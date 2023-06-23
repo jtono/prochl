@@ -1,4 +1,4 @@
-﻿File ID ,Rep ID,Spp,Orig Temp,Treatment ,,Timepoint,Cell count,Dilution ,Actual Cell count,Cell
+﻿File ID ,Rep ID,Spp,Assay.Temp,Treatment ,Evo.Temp,Timepoint,Cell count,Dilution ,Actual Cell count,Cell
 PcB_Recip_T0_030222,R1,PcB,23c,Control,,T0,2179,1,2179,A01
 PcB_Recip_T0_030222,R2,PcB,23c,Control,,T0 ,2108,1,2108,A02
 PcB_Recip_T0_030222,R3,PcB,23c,Control,,T0,2067,1,2067,A03
@@ -383,22 +383,3 @@ PcB_Recip_T15_180222,R3,PcB,29c,recip,23,T15,97078,10,970780,B09
 PcB_Recip_T15_180222,R4,PcB,29c,recip,23,T15,99441,10,994410,B10
 PcB_Recip_T15_180222,R5,PcB,29c,recip,23,T15,103688,10,1036880,B11
 PcB_Recip_T15_180222,R6,PcB,29c,recip,23,T15,112097,10,1120970,B12
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
