@@ -16,18 +16,18 @@ d_tpc$Actual.Cell.count <- as.numeric(d_tpc$Actual.Cell.count)
 #extract date information
 b_tpc$Date <- NA
 for (i in 1:length(b_tpc$File.ID)){
-  b_tpc$Date[i] <- strsplit(b_tpc$File.ID[i], "_")[[1]][4]  
+  b_tpc$Date[i] <- strsplit(b_tpc$File.ID[i], "_")[[1]][4]
 }
 
 d_tpc$Date <- NA
 for (i in 1:length(d_tpc$File.ID)){
-  d_tpc$Date[i] <- strsplit(d_tpc$File.ID[i], "_")[[1]][4]  
+  d_tpc$Date[i] <- strsplit(d_tpc$File.ID[i], "_")[[1]][4]
 }
 
 b_tpc$Date <- format(as.Date(b_tpc$Date, "%d%m%Y"), "20%y-%m-%d")
 d_tpc$Date <- format(as.Date(d_tpc$Date, "%d%m%Y"), "20%y-%m-%d")
 
-#convert to days since begining
+#convert to days since beginning
 b_tpc$day <- as.numeric(round(difftime(b_tpc$Date, b_tpc$Date[1], units="days"), digits=0))
 d_tpc$day <- as.numeric(round(difftime(d_tpc$Date, d_tpc$Date[1], units="days"), digits=0))
 
@@ -52,6 +52,39 @@ ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
   geom_line(aes(group=Rep.ID))+
   facet_wrap(~Treatment)
 
+#####cut to exponential phase - check this####
+library(zoo)
+sub1 <- subset(b_tpc, Treatment==27&Rep.ID=="R2")
+a <- data.frame(x=sub1$day,
+                y=log(sub1$Actual.Cell.count))
+f <- function (d) {
+  m <- lm(y~x, as.data.frame(d))
+  return(coef(m)[2])
+}
+co <- rollapply(a, 3, f, by.column=F)
+co.cl <- kmeans(co, 2)
+b.points <- which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers))+1
+RES <- a[b.points,]
+plot(y~x, data=a)
+points(RES,pch=15,col="red")
+abline(lm(y~x,RES),col="blue")
+#' not working right now
+
+
+a <- data.frame(x=c(0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360),
+                y=c(2.175, 2.134, 2.189, 2.141, 2.854, 3.331, 3.642, 4.333, 4.987, 5.093, 4.943, 5.198, 4.804))
+f <- function (d) {
+  m <- lm(y~x, as.data.frame(d))
+  return(coef(m)[2])
+}
+co <- rollapply(a, 3, f, by.column=F)
+co.cl <- kmeans(co, 2)
+b.points <- which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers))+1
+RES <- a[b.points,]
+plot(a)
+points(RES,pch=15,col="red")
+abline(lm(y~x,RES),col="blue")
+
 #####fit lines####
 #basic regression line - by replicate
 #for b
@@ -70,10 +103,10 @@ for (i in unique(b_tpc$Treatment)){
     temp <- c(temp, i)
   }
 }
-  
-b_gr <- data.frame(temp, rep, int, sl)  
+
+b_gr <- data.frame(temp, rep, int, sl)
 names(b_gr) <- c("Treatment","Rep.ID","int","sl")
-  
+
 p <- ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
   geom_point()+
   geom_line(aes(group=Rep.ID))+
@@ -98,7 +131,7 @@ for (i in unique(d_tpc$Treatment)){
   }
 }
 
-d_gr <- data.frame(temp, rep, int, sl)  
+d_gr <- data.frame(temp, rep, int, sl)
 names(d_gr) <- c("Treatment","Rep.ID","int","sl")
 
 p <- ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
@@ -108,7 +141,7 @@ p <- ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
 p
 p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Rep.ID))
 
-#cut last 2 days for 20, 23 and 25 
+#cut last 2 days for 20, 23 and 25
 ##FIND REASON FOR THIS!!!!
 d_tpc_cut <- d_tpc[!(d_tpc$Treatment%in%c(20,23,25)&d_tpc$day%in%c(15,16)),]
 
@@ -128,7 +161,7 @@ for (i in unique(d_tpc_cut$Treatment)){
   }
 }
 
-d_gr_cut <- data.frame(temp, rep, int, sl)  
+d_gr_cut <- data.frame(temp, rep, int, sl)
 names(d_gr_cut) <- c("Treatment","Rep.ID","int","sl")
 
 p <- ggplot(data=d_tpc_cut, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
@@ -143,22 +176,22 @@ p + geom_abline(data=d_gr_cut, aes(slope=sl, intercept=int, col=Rep.ID))
 #find means and variance
 b_gr_summary <- b_gr %>% group_by(Treatment) %>%summarise_at(vars(sl), list(avg=mean, sd=sd))
 #plot
-ggplot(b_gr_summary, aes(x=Treatment, y=avg)) + 
+ggplot(b_gr_summary, aes(x=Treatment, y=avg)) +
   geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=.1) +
   geom_line() +
   geom_point() +
   geom_point(aes(x=23, y=0.525), color="#2BCC41") +
   geom_point(aes(x=29, y=0.362), color="red")
-  
+
 
 #d
 #find means and variance
 d_gr_summary <- d_gr %>% group_by(Treatment) %>%summarise_at(vars(sl), list(avg=mean, sd=sd))
 #plot
-ggplot(d_gr_summary, aes(x=Treatment, y=avg)) + 
+ggplot(d_gr_summary, aes(x=Treatment, y=avg)) +
   geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=.1) +
   geom_line() +
-  geom_point() + 
+  geom_point() +
   geom_point(aes(x=23, y=0.356), color="#2BCC41") +
   geom_point(aes(x=27, y=0.176), color="red")
 
@@ -166,10 +199,10 @@ ggplot(d_gr_summary, aes(x=Treatment, y=avg)) +
 #find means and variance
 d_gr_cut_summary <- d_gr_cut %>% group_by(Treatment) %>%summarise_at(vars(sl), list(avg=mean, sd=sd))
 #plot
-ggplot(d_gr_cut_summary, aes(x=Treatment, y=avg)) + 
+ggplot(d_gr_cut_summary, aes(x=Treatment, y=avg)) +
   geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=.1) +
   geom_line() +
-  geom_point() + 
+  geom_point() +
   geom_point(aes(x=23, y=0.470), color="#2BCC41") +
   geom_point(aes(x=27, y=0.176), color="red")
 
