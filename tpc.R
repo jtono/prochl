@@ -54,20 +54,55 @@ ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
 
 #####cut to exponential phase - check this####
 library(zoo)
-sub1 <- subset(b_tpc, Treatment==27&Rep.ID=="R2")
+sub1 <- subset(d_tpc, Treatment==27&Rep.ID=="R3")
 a <- data.frame(x=sub1$day,
                 y=log(sub1$Actual.Cell.count))
+lines(loess(y~x, a))
 f <- function (d) {
   m <- lm(y~x, as.data.frame(d))
   return(coef(m)[2])
 }
 co <- rollapply(a, 3, f, by.column=F)
-co.cl <- kmeans(co, 2)
-b.points <- which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers))+1
+co.cl <- kmeans(co, 3)
+b.points <- which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers))+2
+b.points <- which(co.cl$cluster == 1)+2
 RES <- a[b.points,]
 plot(y~x, data=a)
 points(RES,pch=15,col="red")
 abline(lm(y~x,RES),col="blue")
+
+mod <- lm(y~x, a)
+plot(mod$residuals)
+hist(mod$residuals)
+qqnorm(mod$residuals)
+boxplot(mod$residuals)
+
+mod <- lm(y~x, a)
+plot(y~x, data=a)
+abline(lm(y~x,a),col="blue")
+max(abs(mod$residuals))
+mod$residuals
+a2 <- a[-15,]
+mod <- lm(y~x, a2)
+points(y~x, data=a2, col="red")
+abline(lm(y~x,a2),col="blue")
+max(abs(mod$residuals))
+a3 <- a2[-15,]
+mod <- lm(y~x, a3)
+points(y~x, data=a3, col="purple")
+abline(lm(y~x,a3),col="purple")
+max(abs(mod$residuals))
+a4 <- a3[-12,]
+mod <- lm(y~x, a4)
+points(y~x, data=a4, col="green")
+abline(lm(y~x,a4),col="green")
+max(abs(mod$residuals))
+
+
+
+
+
+
 #' not working right now
 
 
