@@ -1,5 +1,6 @@
 library(ggplot2)
 library(dplyr)
+library(lme4)
 
 #####getting data ready#####
 #read in data
@@ -51,6 +52,34 @@ ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
   geom_point()+
   geom_line(aes(group=Rep.ID))+
   facet_wrap(~Treatment)
+
+#####cut to exponential phase - 1) cut off points clearly decreased at end####
+#'get rid of:
+#'b - 25 - 16 - all reps
+#'b - 27 - 15+16 - all reps
+#'d - 20 - 16 - all
+#'d - 23 - 15+16 - all
+#'d - 25 - 15+16 - all
+b_tpc1 <- b_tpc[-which(b_tpc$Treatment==25&b_tpc$day==16|b_tpc$Treatment==27&b_tpc$day%in%c(15,16)),]
+d_tpc1 <- d_tpc[-which(d_tpc$Treatment==20&d_tpc$day==16|d_tpc$Treatment==23&d_tpc$day%in%c(15,16)|d_tpc$Treatment==25&d_tpc$day%in%c(15,16)),]
+
+#check growth curves
+ggplot(data=b_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+sub <- subset(b_tpc1, Treatment=="15")
+mod <- lmer(log(Actual.Cell.count)~day+Treatment+(day|Rep.ID), sub)
+
+
+
 
 #####cut to exponential phase - check this####
 library(zoo)
