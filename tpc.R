@@ -74,6 +74,10 @@ ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
   geom_line(aes(group=Rep.ID))+
   facet_wrap(~Treatment)
 
+#do linear regression to get data - all data
+b_tpc_sum <- getslopes(b_tpc)
+d_tpc_sum <- getslopes(d_tpc)
+
 #####cut to exponential phase - 1) cut off points clearly decreased at end####
 #'get rid of:
 #'b - 25 - 16 - all reps
@@ -98,6 +102,106 @@ ggplot(data=d_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
 #do linear regression to get data
 b_tpc1_sum <- getslopes(b_tpc1)
 d_tpc1_sum <- getslopes(d_tpc1)
+
+#####cut to exponential phase - 2) also cut off weird measurements####
+#'get rid of:
+#'b - 18 - 11 - R3
+#'b - 27 - 11 - R3
+#'b-29-15-all
+#'b-30-5-R1
+#'d-15-7-all
+#'d-20-7-R1
+#'d-30-7-R1
+
+b_tpc2 <- b_tpc1[-which(b_tpc1$Treatment==18&b_tpc1$day==11&b_tpc1$Rep.ID=="R3"|b_tpc1$Treatment==27&b_tpc1$day==11&b_tpc1$Rep.ID=="R3"|b_tpc1$Treatment==29&b_tpc1$day==15|b_tpc1$Treatment==30&b_tpc1$day==5&b_tpc1$Rep.ID=="R1"),]
+d_tpc2 <- d_tpc1[-which(d_tpc1$Treatment==15&d_tpc1$day==7|d_tpc1$Treatment==20&d_tpc1$day==7&d_tpc1$Rep.ID=="R1"|d_tpc1$Treatment==30&d_tpc1$day==7&d_tpc1$Rep.ID=="R1"),]
+
+#check growth curves
+ggplot(data=b_tpc2, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc2, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc2_sum <- getslopes(b_tpc2)
+d_tpc2_sum <- getslopes(d_tpc2)
+
+#####cut to exponential phase - 3) trim ends - only days 5-11 a) with other mods####
+b_tpc3a <- b_tpc2[-which(b_tpc2$day<5|b_tpc2$day>11),]
+d_tpc3a <- d_tpc2[-which(d_tpc2$day<5|d_tpc2$day>11),]
+
+#check growth curves
+ggplot(data=b_tpc3a, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc3a, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc3a_sum <- getslopes(b_tpc3a)
+d_tpc3a_sum <- getslopes(d_tpc3a)
+
+#####cut to exponential phase - 3) trim ends - only days 5-11 b) without other mods####
+b_tpc3b <- b_tpc[-which(b_tpc$day<5|b_tpc$day>11),]
+d_tpc3b <- d_tpc[-which(d_tpc$day<5|d_tpc$day>11),]
+
+#check growth curves
+ggplot(data=b_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc3b_sum <- getslopes(b_tpc3b)
+d_tpc3b_sum <- getslopes(d_tpc3b)
+
+#####cut to exponential phase - 4) try to automatically detect linear portion####
+#####here - don't have code for this####
+b_tpc3b <- b_tpc[-which(b_tpc$day<5|b_tpc$day>11),]
+d_tpc3b <- d_tpc[-which(d_tpc$day<5|d_tpc$day>11),]
+
+#check growth curves
+ggplot(data=b_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc3b_sum <- getslopes(b_tpc3b)
+d_tpc3b_sum <- getslopes(d_tpc3b)
+
+
+#compare slopes
+plot(b_tpc_sum$sl, ylim=c(0,1))
+points(b_tpc1_sum$sl, col="blue")
+points(b_tpc2_sum$sl, col="red")
+points(b_tpc3a_sum$sl, col="purple")
+points(b_tpc3b_sum$sl, col="green")
+
+plot(d_tpc_sum$sl, ylim=c(0,1))
+points(d_tpc1_sum$sl, col="blue")
+points(d_tpc2_sum$sl, col="red")
+points(d_tpc3a_sum$sl, col="purple")
+points(d_tpc3b_sum$sl, col="green")
 
 
 
