@@ -1,6 +1,27 @@
 library(ggplot2)
 library(dplyr)
 library(lme4)
+########functions########
+getslopes <- function(data){
+  treatment <- c()
+  int <- c()
+  sl <- c()
+  rep <- c()
+  for (i in unique(data$Treatment)){
+    sub <- subset(data, Treatment==i)
+    mod <- lmer(log(Actual.Cell.count)~day+(day|Rep.ID), sub)
+    n <- length(unique(sub$Rep.ID))
+    treatment <- c(treatment, rep(i,n))
+    int <- c(int, coef(mod)$Rep.ID[,1])
+    sl <- c(sl, coef(mod)$Rep.ID[,2])
+    rep <- c(rep, rownames(coef(mod)$Rep.ID))
+  }
+  output <- data.frame(treatment, rep, int, sl)
+  return(output)
+}
+
+
+
 
 #####getting data ready#####
 #read in data
@@ -75,8 +96,10 @@ ggplot(data=d_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
   facet_wrap(~Treatment)
 
 #do linear regression to get data
-sub <- subset(b_tpc1, Treatment=="15")
-mod <- lmer(log(Actual.Cell.count)~day+Treatment+(day|Rep.ID), sub)
+b_tpc1_sum <- getslopes(b_tpc1)
+d_tpc1_sum <- getslopes(d_tpc1)
+
+
 
 
 
