@@ -170,24 +170,57 @@ b_tpc3b_sum <- getslopes(b_tpc3b)
 d_tpc3b_sum <- getslopes(d_tpc3b)
 
 #####cut to exponential phase - 4) try to automatically detect linear portion####
-#####here - don't have code for this####
-b_tpc3b <- b_tpc[-which(b_tpc$day<5|b_tpc$day>11),]
-d_tpc3b <- d_tpc[-which(d_tpc$day<5|d_tpc$day>11),]
+par(mfrow=c(3,3), mar=c(1,1,1,1))
+temp <- c()
+rep <- c()
+sl <- c()
+int <- c()
+for (i in unique(b_tpc$Treatment)){
+  for (j in unique(b_tpc$Rep.ID)){
+    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    mod <- lm(y~x, dat)
+    while(summary(mod)$r.squared < 0.95){
+      dat <- dat[-order(abs(mod$residuals), decreasing=TRUE)[1],]
+      mod <- lm(y~x, dat)
+    }
+    plot(y~x, data=dat, ylim=c(6,20), xlim=c(0,18))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, mod$coefficients[2])
+    int <- c(int, mod$coefficients[1])
+  }
+}
 
-#check growth curves
-ggplot(data=b_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
+#put data in dataframe
+b_tpc4_sum <- data.frame(temp, rep, sl, int)
 
-ggplot(data=d_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
+#d
+par(mfrow=c(3,3), mar=c(1,1,1,1))
+temp <- c()
+rep <- c()
+sl <- c()
+int <- c()
+for (i in unique(d_tpc$Treatment)){
+  for (j in unique(d_tpc$Rep.ID)){
+    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    mod <- lm(y~x, dat)
+    while(summary(mod)$r.squared < 0.95){
+      dat <- dat[-order(abs(mod$residuals), decreasing=TRUE)[1],]
+      mod <- lm(y~x, dat)
+    }
+    plot(y~x, data=dat, ylim=c(6,20), xlim=c(0,18))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, mod$coefficients[2])
+    int <- c(int, mod$coefficients[1])
+  }
+}
 
-#do linear regression to get data
-b_tpc3b_sum <- getslopes(b_tpc3b)
-d_tpc3b_sum <- getslopes(d_tpc3b)
+#put data in dataframe
+d_tpc4_sum <- data.frame(temp, rep, sl, int)
+
 
 
 #compare slopes
@@ -196,12 +229,14 @@ points(b_tpc1_sum$sl, col="blue")
 points(b_tpc2_sum$sl, col="red")
 points(b_tpc3a_sum$sl, col="purple")
 points(b_tpc3b_sum$sl, col="green")
+points(b_tpc4_sum$sl, col="orange", pch=16)
 
 plot(d_tpc_sum$sl, ylim=c(0,1))
 points(d_tpc1_sum$sl, col="blue")
 points(d_tpc2_sum$sl, col="red")
 points(d_tpc3a_sum$sl, col="purple")
 points(d_tpc3b_sum$sl, col="green")
+points(d_tpc4_sum$sl, col="orange", pch=16)
 
 
 
