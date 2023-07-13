@@ -221,15 +221,108 @@ for (i in unique(d_tpc$Treatment)){
 #put data in dataframe
 d_tpc4_sum <- data.frame(temp, rep, sl, int)
 
+#####cut to exponential phase - 5) try max gr a) use code from PhD####
+#functions needed
+nderiv <- function(fit, x, eps=1e-5)
+  (predict(fit, x + eps) - predict(fit, x - eps))/(2 * eps)
 
+spline.slope <- function(x, y, n, eps=1e-5)
+  max(nderiv(loess(log(y) ~ x, degree=1, span=0.2),
+             seq(min(x), max(x), length=n)), na.rm=TRUE)
+#d
+temp <- c()
+rep <- c()
+sl <- c()
+for (i in unique(d_tpc$Treatment)){
+  for (j in unique(d_tpc$Rep.ID)){
+    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
+    k <- spline.slope(sub$day, sub$Actual.Cell.count, length(sub$File.ID))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, k)
+  }
+}
+
+#put data in dataframe
+d_tpc5a_sum <- data.frame(temp, rep, sl)
+
+#b
+temp <- c()
+rep <- c()
+sl <- c()
+for (i in unique(b_tpc$Treatment)){
+  for (j in unique(b_tpc$Rep.ID)){
+    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
+    k <- spline.slope(sub$day, sub$Actual.Cell.count, length(sub$File.ID))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, k)
+  }
+}
+
+#put data in dataframe
+b_tpc5a_sum <- data.frame(temp, rep, sl)
+
+#!!!!many warnings
+#!!!didn't work for d at all
+
+#####cut to exponential phase - 5) try max gr b) lm 3 pts with R2 > 0.95####
+#d
+temp <- c()
+rep <- c()
+maxsl <- c()
+for (i in unique(d_tpc$Treatment)){
+  for (j in unique(d_tpc$Rep.ID)){
+    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    sl<-c()
+    for (k in 1:(length(dat$x)-2)){
+      mod <- lm(y[k:(k+2)]~x[k:(k+2)], dat)
+      if(summary(mod)$r.squared > 0.95){
+        sl <- c(sl, mod$coefficients[2])}
+    }
+    maxsl <- c(maxsl,max(sl))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    }
+}
+
+#put data in dataframe
+d_tpc5b_sum <- data.frame(temp, rep, maxsl)
+
+#b
+temp <- c()
+rep <- c()
+maxsl <- c()
+for (i in unique(b_tpc$Treatment)){
+  for (j in unique(b_tpc$Rep.ID)){
+    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    sl<-c()
+    for (k in 1:(length(dat$x)-2)){
+      mod <- lm(y[k:(k+2)]~x[k:(k+2)], dat)
+      if(summary(mod)$r.squared > 0.95){
+        sl <- c(sl, mod$coefficients[2])}
+    }
+    maxsl <- c(maxsl,max(sl))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+  }
+}
+
+#put data in dataframe
+b_tpc5b_sum <- data.frame(temp, rep, maxsl)
 
 #compare slopes
-plot(b_tpc_sum$sl, ylim=c(0,1))
+plot(b_tpc_sum$sl, ylim=c(0,2))
 points(b_tpc1_sum$sl, col="blue")
 points(b_tpc2_sum$sl, col="red")
 points(b_tpc3a_sum$sl, col="purple")
 points(b_tpc3b_sum$sl, col="green")
 points(b_tpc4_sum$sl, col="orange", pch=16)
+points(b_tpc5a_sum$sl, col="lightblue", pch=16)
+points(b_tpc5b_sum$maxsl, col="darkgreen", pch=16)
+
 
 plot(d_tpc_sum$sl, ylim=c(0,1))
 points(d_tpc1_sum$sl, col="blue")
@@ -237,8 +330,8 @@ points(d_tpc2_sum$sl, col="red")
 points(d_tpc3a_sum$sl, col="purple")
 points(d_tpc3b_sum$sl, col="green")
 points(d_tpc4_sum$sl, col="orange", pch=16)
-
-
+points(d_tpc5a_sum$sl, col="lightblue", pch=16)
+points(d_tpc5b_sum$maxsl, col="darkgreen", pch=16)
 
 
 
