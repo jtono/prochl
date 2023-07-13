@@ -314,24 +314,24 @@ for (i in unique(b_tpc$Treatment)){
 b_tpc5b_sum <- data.frame(temp, rep, maxsl)
 
 #compare slopes
-plot(b_tpc_sum$sl, ylim=c(0,2))
-points(b_tpc1_sum$sl, col="blue")
-points(b_tpc2_sum$sl, col="red")
-points(b_tpc3a_sum$sl, col="purple")
-points(b_tpc3b_sum$sl, col="green")
-points(b_tpc4_sum$sl, col="orange", pch=16)
-points(b_tpc5a_sum$sl, col="lightblue", pch=16)
-points(b_tpc5b_sum$maxsl, col="darkgreen", pch=16)
+plot(b_tpc_sum$sl~jitter(b_tpc_sum$treatment,2), ylim=c(0,2))
+points(b_tpc1_sum$sl~jitter(b_tpc1_sum$treatment,2), col="blue")
+points(b_tpc2_sum$sl~jitter(b_tpc2_sum$treatment,2), col="red")
+points(b_tpc3a_sum$sl~jitter(b_tpc3a_sum$treatment,2), col="purple")
+points(b_tpc3b_sum$sl~jitter(b_tpc3b_sum$treatment,2), col="green")
+points(b_tpc4_sum$sl~jitter(b_tpc4_sum$temp,2), col="orange", pch=16)
+points(b_tpc5a_sum$sl~jitter(b_tpc5a_sum$temp,2), col="lightblue", pch=16)
+points(b_tpc5b_sum$maxsl~jitter(b_tpc5b_sum$temp,2), col="darkgreen", pch=16)
 
 
-plot(d_tpc_sum$sl, ylim=c(0,1))
-points(d_tpc1_sum$sl, col="blue")
-points(d_tpc2_sum$sl, col="red")
-points(d_tpc3a_sum$sl, col="purple")
-points(d_tpc3b_sum$sl, col="green")
-points(d_tpc4_sum$sl, col="orange", pch=16)
-points(d_tpc5a_sum$sl, col="lightblue", pch=16)
-points(d_tpc5b_sum$maxsl, col="darkgreen", pch=16)
+plot(d_tpc_sum$sl~jitter(d_tpc_sum$treatment,2), ylim=c(0,1))
+points(d_tpc1_sum$sl~jitter(d_tpc1_sum$treatment,2), col="blue")
+points(d_tpc2_sum$sl~jitter(d_tpc2_sum$treatment,2), col="red")
+points(d_tpc3a_sum$sl~jitter(d_tpc3a_sum$treatment,2), col="purple")
+points(d_tpc3b_sum$sl~jitter(d_tpc3b_sum$treatment,2), col="green")
+points(d_tpc4_sum$sl~jitter(d_tpc4_sum$temp,2), col="orange", pch=16)
+points(d_tpc5a_sum$sl~jitter(d_tpc5a_sum$temp,2), col="lightblue", pch=16)
+points(d_tpc5b_sum$maxsl~jitter(d_tpc5b_sum$temp,2), col="darkgreen", pch=16)
 
 
 
