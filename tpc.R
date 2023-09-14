@@ -379,6 +379,14 @@ points(d_tpc5b_sum$maxsl~jitter(d_tpc5b_sum$temp,2), col="yellow", pch=16)
 #pretty similar by eye except light blue and yellow
 #'black lower for higher growing ones
 
+#######fit tpcs#####
+# load packages
+library(rTPC)
+library(nls.multstart)
+library(broom)
+library(tidyverse)
+
+get_model_names()
 
 
 
