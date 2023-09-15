@@ -21,14 +21,14 @@ ggplot(d, aes(temp, rate)) +
        title = 'Respiration across temperatures')
 
 # choose model
-mod = 'sharpschoolhigh_1981'
+mod = 'beta_2012'
 
 # get start vals
-start_vals <- get_start_vals(d$temp, d$rate, model_name = 'sharpeschoolhigh_1981')
+start_vals <- get_start_vals(d$temp, d$rate, model_name = mod)
 
 # get limits
-low_lims <- get_lower_lims(d$temp, d$rate, model_name = 'sharpeschoolhigh_1981')
-upper_lims <- get_upper_lims(d$temp, d$rate, model_name = 'sharpeschoolhigh_1981')
+low_lims <- get_lower_lims(d$temp, d$rate, model_name = mod)
+upper_lims <- get_upper_lims(d$temp, d$rate, model_name = mod)
 
 start_vals
 #>     r_tref          e         eh         th
@@ -41,7 +41,7 @@ upper_lims
 #>  1.616894 10.000000 20.000000 49.000000
 
 # fit model
-fit <- nls_multstart(rate~sharpeschoolhigh_1981(temp = temp, r_tref,e,eh,th, tref = 15),
+fit <- nls_multstart(rate~beta_2012(temp = temp, a,b,c,d,e),
                      data = d,
                      iter = 500,
                      start_lower = start_vals - 10,

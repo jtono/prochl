@@ -16,7 +16,7 @@ getslopes <- function(data){
     sl <- c(sl, coef(mod)$Rep.ID[,2])
     rep <- c(rep, rownames(coef(mod)$Rep.ID))
   }
-  output <- data.frame(treatment, rep, int, sl)
+  output <- data.frame(temp=treatment, rep, int, sl)
   return(output)
 }
 
@@ -36,7 +36,7 @@ getslopeslm <- function(data){
       rep <- c(rep, j)
     }
   }
-  output <- data.frame(treatment, rep, int, sl)
+  output <- data.frame(temp=treatment, rep, int, sl)
   return(output)
 }
 
@@ -202,7 +202,7 @@ d_tpc3b_sum <- getslopes(d_tpc3b)
 b_tpc3b_sumlm <- getslopeslm(b_tpc3b)
 d_tpc3b_sumlm <- getslopeslm(d_tpc3b)
 
-#####!!DOESNT WORK!!! cut to exponential phase - 4) try to automatically detect linear portion####
+#####!!DOESNT WORK>???? cut to exponential phase - 4) try to automatically detect linear portion####
 par(mfrow=c(3,3), mar=c(1,1,1,1))
 temp <- c()
 rep <- c()
@@ -321,7 +321,7 @@ for (i in unique(d_tpc$Treatment)){
 }
 
 #put data in dataframe
-d_tpc5b_sum <- data.frame(temp, rep, maxsl)
+d_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
 
 #b
 temp <- c()
@@ -344,38 +344,38 @@ for (i in unique(b_tpc$Treatment)){
 }
 
 #put data in dataframe
-b_tpc5b_sum <- data.frame(temp, rep, maxsl)
+b_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
 
 #####compare slopes#######
 #compare slopes
-plot(b_tpc_sum$sl~jitter(b_tpc_sum$treatment,2), ylim=c(0,2))
-points(b_tpc1_sumlm$sl~jitter(b_tpc1_sumlm$treatment,2), col="grey")
-points(b_tpc1_sum$sl~jitter(b_tpc1_sum$treatment,2), col="blue")
-points(b_tpc1_sumlm$sl~jitter(b_tpc1_sumlm$treatment,2), col="darkblue")
-points(b_tpc2_sum$sl~jitter(b_tpc2_sum$treatment,2), col="red")
-points(b_tpc2_sumlm$sl~jitter(b_tpc2_sumlm$treatment,2), col="darkred")
-points(b_tpc3a_sum$sl~jitter(b_tpc3a_sum$treatment,2), col="violet")
-points(b_tpc3a_sumlm$sl~jitter(b_tpc3a_sumlm$treatment,2), col="purple")
-points(b_tpc3b_sum$sl~jitter(b_tpc3b_sum$treatment,2), col="green")
-points(b_tpc3b_sumlm$sl~jitter(b_tpc3b_sumlm$treatment,2), col="darkgreen")
+plot(b_tpc_sum$sl~jitter(b_tpc_sum$temp,2), ylim=c(0,2))
+points(b_tpc_sumlm$sl~jitter(b_tpc_sumlm$temp,2), col="grey")
+points(b_tpc1_sum$sl~jitter(b_tpc1_sum$temp,2), col="blue")
+points(b_tpc1_sumlm$sl~jitter(b_tpc1_sumlm$temp,2), col="darkblue")
+points(b_tpc2_sum$sl~jitter(b_tpc2_sum$temp,2), col="red")
+points(b_tpc2_sumlm$sl~jitter(b_tpc2_sumlm$temp,2), col="darkred")
+points(b_tpc3a_sum$sl~jitter(b_tpc3a_sum$temp,2), col="violet")
+points(b_tpc3a_sumlm$sl~jitter(b_tpc3a_sumlm$temp,2), col="purple")
+points(b_tpc3b_sum$sl~jitter(b_tpc3b_sum$temp,2), col="green")
+points(b_tpc3b_sumlm$sl~jitter(b_tpc3b_sumlm$temp,2), col="darkgreen")
 points(b_tpc4_sum$sl~jitter(b_tpc4_sum$temp,2), col="orange", pch=16)
 points(b_tpc5a_sum$sl~jitter(b_tpc5a_sum$temp,2), col="lightblue", pch=16)
-points(b_tpc5b_sum$maxsl~jitter(b_tpc5b_sum$temp,2), col="yellow", pch=16)
+points(b_tpc5b_sum$sl~jitter(b_tpc5b_sum$temp,2), col="yellow", pch=16)
 #'similar by eye except light blue
 
-plot(d_tpc_sum$sl~jitter(d_tpc_sum$treatment,2), ylim=c(0,1))
-points(d_tpc1_sumlm$sl~jitter(d_tpc1_sumlm$treatment,2), col="grey")
-points(d_tpc1_sum$sl~jitter(d_tpc1_sum$treatment,2), col="blue")
-points(d_tpc1_sumlm$sl~jitter(d_tpc1_sumlm$treatment,2), col="darkblue")
-points(d_tpc2_sum$sl~jitter(d_tpc2_sum$treatment,2), col="red")
-points(d_tpc2_sumlm$sl~jitter(d_tpc2_sumlm$treatment,2), col="darkred")
-points(d_tpc3a_sum$sl~jitter(d_tpc3a_sum$treatment,2), col="violet")
-points(d_tpc3a_sumlm$sl~jitter(d_tpc3a_sumlm$treatment,2), col="purple")
-points(d_tpc3b_sum$sl~jitter(d_tpc3b_sum$treatment,2), col="green")
-points(d_tpc3b_sumlm$sl~jitter(d_tpc3b_sumlm$treatment,2), col="darkgreen")
+plot(d_tpc_sum$sl~jitter(d_tpc_sum$temp,2), ylim=c(0,1))
+points(d_tpc_sumlm$sl~jitter(d_tpc_sumlm$temp,2), col="grey")
+points(d_tpc1_sum$sl~jitter(d_tpc1_sum$temp,2), col="blue")
+points(d_tpc1_sumlm$sl~jitter(d_tpc1_sumlm$temp,2), col="darkblue")
+points(d_tpc2_sum$sl~jitter(d_tpc2_sum$temp,2), col="red")
+points(d_tpc2_sumlm$sl~jitter(d_tpc2_sumlm$temp,2), col="darkred")
+points(d_tpc3a_sum$sl~jitter(d_tpc3a_sum$temp,2), col="violet")
+points(d_tpc3a_sumlm$sl~jitter(d_tpc3a_sumlm$temp,2), col="purple")
+points(d_tpc3b_sum$sl~jitter(d_tpc3b_sum$temp,2), col="green")
+points(d_tpc3b_sumlm$sl~jitter(d_tpc3b_sumlm$temp,2), col="darkgreen")
 points(d_tpc4_sum$sl~jitter(d_tpc4_sum$temp,2), col="orange", pch=16)
 points(d_tpc5a_sum$sl~jitter(d_tpc5a_sum$temp,2), col="lightblue", pch=16)
-points(d_tpc5b_sum$maxsl~jitter(d_tpc5b_sum$temp,2), col="yellow", pch=16)
+points(d_tpc5b_sum$sl~jitter(d_tpc5b_sum$temp,2), col="yellow", pch=16)
 #pretty similar by eye except light blue and yellow
 #'black lower for higher growing ones
 
@@ -386,7 +386,64 @@ library(nls.multstart)
 library(broom)
 library(tidyverse)
 
-get_model_names()
+#'all data sources for b:
+data_b <- list("lmer" = b_tpc_sum,"lm" = b_tpc_sumlm, "lmer1"=b_tpc1_sum, "lm1"=b_tpc1_sumlm, "lmer2"=b_tpc2_sum,"lm2"=b_tpc2_sumlm, "lmer3a"=b_tpc3a_sum,"lm3a"=b_tpc3a_sumlm,"lmer3b"=b_tpc3b_sum,"lm3b"=b_tpc3b_sumlm,"gr4"=b_tpc4_sum,"gr5a"=b_tpc5a_sum, "gr5b"=b_tpc5b_sum)
+
+#'for each data source, fit all models
+#'extract convergence tolerance and AIC for each
+#'keep track of: data, model, convergence tol, AIC
+d_name <- c()
+mod <- c()
+con_tol <- c()
+aic <- c()
+
+for (i in 1:length(data_b)){
+  d_name <- c(d_name,names(data_b[i]))
+  mod <- c(mod, "beta_2012")
+  # get start vals
+  start_vals <- get_start_vals(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
+  # get limits
+  low_lims <- get_lower_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
+  upper_lims <- get_upper_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
+  fit <- nls_multstart(sl~beta_2012(temp = temp, a,b,c,d,e),
+                       data = data_b[[i]],
+                       iter = 500,
+                       start_lower = start_vals - 10,
+                       start_upper = start_vals + 10,
+                       lower = low_lims,
+                       upper = upper_lims,
+                       supp_errors = 'Y',
+                       convergence_count=FALSE)
+  con_tol <- c(con_tol, fit$convInfo$finTol)
+  aic <- c(aic, AIC(fit))
+}
+
+for (i in 1:length(data_b)){
+  d_name <- c(d_name,names(data_b[i]))
+  mod <- c(mod, "beta_2012")
+  # get start vals
+  start_vals <- get_start_vals(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
+  # get limits
+  low_lims <- get_lower_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
+  upper_lims <- get_upper_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
+  fit <- nls_multstart(sl~beta_2012(temp = temp, a,b,c,d,e),
+                       data = data_b[[i]],
+                       iter = 500,
+                       start_lower = start_vals - 10,
+                       start_upper = start_vals + 10,
+                       lower = low_lims,
+                       upper = upper_lims,
+                       supp_errors = 'Y',
+                       convergence_count=FALSE)
+  con_tol <- c(con_tol, fit$convInfo$finTol)
+  aic <- c(aic, AIC(fit))
+}
+
+b_fit_results <- data.frame(d_name, mod, con_tol, aic)
+
+
+
+
 
 
 
