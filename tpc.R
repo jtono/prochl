@@ -385,61 +385,85 @@ library(rTPC)
 library(nls.multstart)
 library(broom)
 library(tidyverse)
+library(MuMIn)
 
 #'all data sources for b:
 data_b <- list("lmer" = b_tpc_sum,"lm" = b_tpc_sumlm, "lmer1"=b_tpc1_sum, "lm1"=b_tpc1_sumlm, "lmer2"=b_tpc2_sum,"lm2"=b_tpc2_sumlm, "lmer3a"=b_tpc3a_sum,"lm3a"=b_tpc3a_sumlm,"lmer3b"=b_tpc3b_sum,"lm3b"=b_tpc3b_sumlm,"gr4"=b_tpc4_sum,"gr5a"=b_tpc5a_sum, "gr5b"=b_tpc5b_sum)
 
-#'for each data source, fit all models
+#'for each data source, fit all models in: -	Boatman_2017, sharpeschoolfull_1981, modifiedgaussian_2006, oneill_1972, Thomas_2012, briere2_1999, quadratic_2008, johnsonlewin_1946, Hinshelwood_1947
 #'extract convergence tolerance and AIC for each
-#'keep track of: data, model, convergence tol, AIC
+#'keep track of: dataset, rep, model, AICc
 d_name <- c()
+rep_name <- c()
 mod <- c()
-con_tol <- c()
-aic <- c()
+aicc <- c()
 
+#Boatman_2017
 for (i in 1:length(data_b)){
-  d_name <- c(d_name,names(data_b[i]))
-  mod <- c(mod, "beta_2012")
-  # get start vals
-  start_vals <- get_start_vals(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
-  # get limits
-  low_lims <- get_lower_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
-  upper_lims <- get_upper_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
-  fit <- nls_multstart(sl~beta_2012(temp = temp, a,b,c,d,e),
-                       data = data_b[[i]],
-                       iter = 500,
-                       start_lower = start_vals - 10,
-                       start_upper = start_vals + 10,
-                       lower = low_lims,
-                       upper = upper_lims,
-                       supp_errors = 'Y',
-                       convergence_count=FALSE)
-  con_tol <- c(con_tol, fit$convInfo$finTol)
-  aic <- c(aic, AIC(fit))
+  for (j in unique(data_b[[i]]$rep)){
+    sub <- subset(data_b[[i]], rep==j)
+    d_name <- c(d_name,names(data_b[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "boatman_2017")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "boatman_2017")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "boatman_2017")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "boatman_2017")
+    fit <- nls_multstart(sl~boatman_2017(temp = temp, rmax, tmin, tmax, a, b),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aicc <- c(aicc, AICc(fit))
+  }
 }
 
+b_fit_results <- data.frame(d_name, rep_name, mod, aicc)
+####left off here###
+#, sharpeschoolfull_1981, modifiedgaussian_2006, oneill_1972, Thomas_2012, briere2_1999, quadratic_2008, johnsonlewin_1946, Hinshelwood_1947
+
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aicc <- c()
 for (i in 1:length(data_b)){
-  d_name <- c(d_name,names(data_b[i]))
-  mod <- c(mod, "beta_2012")
-  # get start vals
-  start_vals <- get_start_vals(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
-  # get limits
-  low_lims <- get_lower_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
-  upper_lims <- get_upper_lims(data_b[[i]]$temp, data_b[[i]]$sl, model_name = "beta_2012")
-  fit <- nls_multstart(sl~beta_2012(temp = temp, a,b,c,d,e),
-                       data = data_b[[i]],
-                       iter = 500,
-                       start_lower = start_vals - 10,
-                       start_upper = start_vals + 10,
-                       lower = low_lims,
-                       upper = upper_lims,
-                       supp_errors = 'N',
-                       convergence_count=FALSE)
-  con_tol <- c(con_tol, fit$convInfo$finTol)
-  aic <- c(aic, AIC(fit))
+  for (j in unique(data_b[[i]]$rep)){
+    sub <- subset(data_b[[i]], rep==j)
+    d_name <- c(d_name,names(data_b[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "boatman_2017")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "boatman_2017")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "boatman_2017")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "boatman_2017")
+    fit <- nls_multstart(sl~boatman_2017(temp = temp, rmax, tmin, tmax, a, b),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aicc <- c(aicc, AICc(fit))
+  }
 }
 
-b_fit_results <- data.frame(d_name, mod, con_tol, aic)
+b_fit_results <- data.frame(d_name, rep_name, mod, aicc)
+
+
+
+
+b_fit_results2 <- data.frame(d_name, rep_name, mod, aicc)
+rbind(b_fit_results, b_fit_results2)
 
 
 
