@@ -433,7 +433,7 @@ for (i in 1:length(data_b)){
                        start_upper = start_vals + 10,
                        lower = low_lims,
                        upper = upper_lims,
-                       supp_errors = 'Y',
+                       supp_errors = 'N',
                        convergence_count=FALSE)
   con_tol <- c(con_tol, fit$convInfo$finTol)
   aic <- c(aic, AIC(fit))
