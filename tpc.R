@@ -744,9 +744,13 @@ res9 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 b_fit_results <- rbind(b_fit_results, res9)
 
 write.csv(b_fit_results, "b_fits.csv")
+#'best model according to AICc is quadratic_2008, best according to AIC is modifiedgaussian_2006
+b_fits <- read.csv("b_fits.csv", header=TRUE)
 
-
-
+mean(b_fits[b_fits$mod=="quadratic_2008",]$topt)
+#23.01744
+mean(b_fits[b_fits$mod=="modifiedgaussian_2006",]$topt)
+#23.45
 
 
 
