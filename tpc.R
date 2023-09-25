@@ -110,7 +110,7 @@ d_tpc_sum <- getslopes(d_tpc)
 b_tpc_sumlm <- getslopeslm(b_tpc)
 d_tpc_sumlm <- getslopeslm(d_tpc)
 
-#####do rolling regression#####
+#####do rolling regression - 6#####
 # create the rolling regression function
 roll_regress <- function(x){
   temp <- data.frame(x)
@@ -139,6 +139,10 @@ b_gr_roll6 <- models_b %>%
   filter(slope == max(slope, na.rm = TRUE)) %>%
   ungroup()
 
+names(b_gr_roll6)[1] <- "rep"
+names(b_gr_roll6)[2] <- "temp"
+names(b_gr_roll6)[3] <- "sl"
+
 #d
 models_d <- d_tpc %>%
   group_by(Rep.ID, Treatment) %>%
@@ -152,28 +156,56 @@ d_gr_roll6 <- models_d %>%
   filter(slope == max(slope, na.rm = TRUE)) %>%
   ungroup()
 
+names(d_gr_roll6)[1] <- "rep"
+names(d_gr_roll6)[2] <- "temp"
+names(d_gr_roll6)[3] <- "sl"
+
 #####fit with growthrates package - 7#####
 #a - with easy linear fit
 L_b <- all_easylinear(Actual.Cell.count ~ day | Rep.ID + Treatment, data=b_tpc)
 b_tpc7a_sum <- results(L_b)
 
+names(b_tpc7a_sum)[1] <- "rep"
+names(b_tpc7a_sum)[2] <- "temp"
+names(b_tpc7a_sum)[5] <- "sl"
+
 L_d <- all_easylinear(Actual.Cell.count ~ day | Rep.ID + Treatment, data=d_tpc)
 d_tpc7a_sum <- results(L_d)
+
+names(d_tpc7a_sum)[1] <- "rep"
+names(d_tpc7a_sum)[2] <- "temp"
+names(d_tpc7a_sum)[5] <- "sl"
 
 #b - with nonparametric smoothing splines
 many_spline_fits_b <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = b_tpc)
 b_tpc7b_sum <- results(many_spline_fits_b)
 
+names(b_tpc7b_sum)[1] <- "rep"
+names(b_tpc7b_sum)[2] <- "temp"
+names(b_tpc7b_sum)[4] <- "sl"
+
 many_spline_fits_d <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = d_tpc)
 d_tpc7b_sum <- results(many_spline_fits_d)
+
+names(d_tpc7b_sum)[1] <- "rep"
+names(d_tpc7b_sum)[2] <- "temp"
+names(d_tpc7b_sum)[4] <- "sl"
 
 #again with spar set to 0.5 (moderate value)
 #https://tpetzoldt.github.io/growthrates/doc/Introduction.html#nonparametric-smoothing-splines
 many_spline_fits_b <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = b_tpc, spar = 0.5)
 b_tpc7b05_sum <- results(many_spline_fits_b)
 
+names(b_tpc7b05_sum)[1] <- "rep"
+names(b_tpc7b05_sum)[2] <- "temp"
+names(b_tpc7b05_sum)[4] <- "sl"
+
 many_spline_fits_d <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = d_tpc, spar = 0.5)
 d_tpc7b05_sum <- results(many_spline_fits_d)
+
+names(d_tpc7b05_sum)[1] <- "rep"
+names(d_tpc7b05_sum)[2] <- "temp"
+names(d_tpc7b05_sum)[4] <- "sl"
 
 
 #####cut to exponential phase - 1) cut off points clearly decreased at end####
@@ -186,11 +218,15 @@ d_tpc7b05_sum <- results(many_spline_fits_d)
 b_tpc1 <- b_tpc[-which(b_tpc$Treatment==25&b_tpc$day==16|b_tpc$Treatment==27&b_tpc$day%in%c(15,16)),]
 d_tpc1 <- d_tpc[-which(d_tpc$Treatment==20&d_tpc$day==16|d_tpc$Treatment==23&d_tpc$day%in%c(15,16)|d_tpc$Treatment==25&d_tpc$day%in%c(15,16)),]
 
-#check growth curves
-ggplot(data=b_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+#check growth curves - edited to show fit lines
+b_tpc1$temp_rep <- paste(b_tpc1$Treatment,b_tpc1$Rep.ID)
+b_tpc1_sumlm$temp_rep <- paste(b_tpc1_sumlm$temp,b_tpc1_sumlm$rep)
+p <- ggplot(data=b_tpc1, aes(x=day, y=log(Actual.Cell.count), col=c(Treatment)))+
   geom_point()+
-  geom_line(aes(group=Rep.ID))+
+  geom_line(aes(group=temp_rep))+
   facet_wrap(~Treatment)
+p+geom_abline(slope=b_tpc1_sumlm$sl, intercept=b_tpc1_sumlm$int, col=c(b_tpc1_sumlm$temp))+facet_wrap(~b_tpc1_sumlm$temp)
+
 
 ggplot(data=d_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
   geom_point()+
@@ -423,7 +459,6 @@ for (i in unique(b_tpc$Treatment)){
 #put data in dataframe
 b_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
 
-######add to these plots and after#####
 #####compare slopes#######
 #compare slopes
 plot(b_tpc_sum$sl~jitter(b_tpc_sum$temp,2), ylim=c(0,2))
@@ -439,7 +474,12 @@ points(b_tpc3b_sumlm$sl~jitter(b_tpc3b_sumlm$temp,2), col="darkgreen")
 points(b_tpc4_sum$sl~jitter(b_tpc4_sum$temp,2), col="orange", pch=16)
 points(b_tpc5a_sum$sl~jitter(b_tpc5a_sum$temp,2), col="lightblue", pch=16)
 points(b_tpc5b_sum$sl~jitter(b_tpc5b_sum$temp,2), col="yellow", pch=16)
+points(b_gr_roll6$sl~jitter(b_gr_roll6$temp,2), col="pink", pch=18)
+points(b_tpc7a_sum$sl~jitter(b_tpc7a_sum$temp,2), col="cyan", pch=18)
+points(b_tpc7b_sum$sl~jitter(b_tpc7b_sum$temp,2), col="magenta", pch=18)
+points(b_tpc7b05_sum$sl~jitter(b_tpc7b05_sum$temp,2), col="brown", pch=18)
 #'similar by eye except light blue
+#'some points for pink, magenta quite different (because didn't trim data?)
 
 plot(d_tpc_sum$sl~jitter(d_tpc_sum$temp,2), ylim=c(0,1))
 points(d_tpc_sumlm$sl~jitter(d_tpc_sumlm$temp,2), col="grey")
@@ -454,13 +494,19 @@ points(d_tpc3b_sumlm$sl~jitter(d_tpc3b_sumlm$temp,2), col="darkgreen")
 points(d_tpc4_sum$sl~jitter(d_tpc4_sum$temp,2), col="orange", pch=16)
 points(d_tpc5a_sum$sl~jitter(d_tpc5a_sum$temp,2), col="lightblue", pch=16)
 points(d_tpc5b_sum$sl~jitter(d_tpc5b_sum$temp,2), col="yellow", pch=16)
+points(d_gr_roll6$sl~jitter(d_gr_roll6$temp,2), col="pink", pch=18)
+points(d_tpc7a_sum$sl~jitter(d_tpc7a_sum$temp,2), col="cyan", pch=18)
+points(d_tpc7b_sum$sl~jitter(d_tpc7b_sum$temp,2), col="magenta", pch=18)
+points(d_tpc7b05_sum$sl~jitter(d_tpc7b05_sum$temp,2), col="brown", pch=18)
 #pretty similar by eye except light blue and yellow
-#'black lower for higher growing ones
+#'light blue very wrong
+#'yellow, pink, magenta (although magenta even higher)  much higher for higher ones
+#'black and grey lower for higher growing ones
 
 #######fit tpcs - b#####
 
 #'all data sources for b:
-data_b <- list("lmer" = b_tpc_sum,"lm" = b_tpc_sumlm, "lmer1"=b_tpc1_sum, "lm1"=b_tpc1_sumlm, "lmer2"=b_tpc2_sum,"lm2"=b_tpc2_sumlm, "lmer3a"=b_tpc3a_sum,"lm3a"=b_tpc3a_sumlm,"lmer3b"=b_tpc3b_sum,"lm3b"=b_tpc3b_sumlm,"gr4"=b_tpc4_sum,"gr5a"=b_tpc5a_sum, "gr5b"=b_tpc5b_sum)
+data_b <- list("lmer" = b_tpc_sum,"lm" = b_tpc_sumlm, "lmer1"=b_tpc1_sum, "lm1"=b_tpc1_sumlm, "lmer2"=b_tpc2_sum,"lm2"=b_tpc2_sumlm, "lmer3a"=b_tpc3a_sum,"lm3a"=b_tpc3a_sumlm,"lmer3b"=b_tpc3b_sum,"lm3b"=b_tpc3b_sumlm,"gr4"=b_tpc4_sum,"gr5a"=b_tpc5a_sum, "gr5b"=b_tpc5b_sum, "gr6"=b_gr_roll6, "gr7a"=b_tpc7a_sum, "gr7b"=b_tpc7b_sum, "gr7b05"=b_tpc7b05_sum)
 
 #'for each data source, fit all models in: -	Boatman_2017, sharpeschoolfull_1981, modifiedgaussian_2006, oneill_1972, Thomas_2012, briere2_1999, quadratic_2008, johnsonlewin_1946 - cut cuz errors, Hinshelwood_1947, lactin2_1995 added cuz good with -ve values
 #'extract convergence tolerance and AIC for each
@@ -519,6 +565,7 @@ for (i in 1:length(data_b)){
 
     # get start vals
     start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "sharpeschoolfull_1981")
+    start_vals[which(is.na(start_vals))]<-1
     # get limits
     low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "sharpeschoolfull_1981")
     upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "sharpeschoolfull_1981")
@@ -816,20 +863,37 @@ res9 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 b_fit_results <- rbind(b_fit_results, res9)
 
 write.csv(b_fit_results, "b_fits.csv")
-#'best model according to AICc is quadratic_2008, best according to AIC is modifiedgaussian_2006
+#'(before added 6, 7) best model according to AICc is quadratic_2008, best according to AIC is modifiedgaussian_2006 (done by hand)
 b_fits <- read.csv("b_fits.csv", header=TRUE)
 
 mean(b_fits[b_fits$mod=="quadratic_2008",]$topt)
-#23.01744
+#23.58784
 mean(b_fits[b_fits$mod=="modifiedgaussian_2006",]$topt)
-#23.45
+#23.87157
+
+b_fits[which(b_fits$aicc==min(b_fits$aicc)),]
+#  X d_name rep_name            mod       aic    aicc  topt
+#349 349   gr7a       R1 quadratic_2008 -21.29823 -7.9649 24.57
+b_fits[which(b_fits$aic==min(b_fits$aic)),]
+# X d_name rep_name          mod       aic     aicc  topt
+#18 18    lm2       R3 boatman_2017 -38.80806 45.19194 24.67
+
+#find overall best fitting gr data - by median - using aicc
+b_fits_gr <- aggregate(b_fits$aicc, list(b_fits$d_name), FUN=median)
+b_fits_gr[which(b_fits_gr$x==min(b_fits_gr$x)),]
+#lm1 19.55381
+b_fits_mod <- aggregate(b_fits$aicc, list(b_fits$mod), FUN=median)
+b_fits_mod[which(b_fits_mod$x==min(b_fits_mod$x)),]
+#quadratic_2008 5.244838
+
+
 
 #######fit tpcs - d#####
 #'all data sources for d:
 #'first get rid of -Inf
 d_tpc5b_sum <- d_tpc5b_sum[-which(d_tpc5b_sum$sl==-Inf),]
 #'now put together
-data_d <- list("lmer" = d_tpc_sum,"lm" = d_tpc_sumlm, "lmer1"=d_tpc1_sum, "lm1"=d_tpc1_sumlm, "lmer2"=d_tpc2_sum,"lm2"=d_tpc2_sumlm, "lmer3a"=d_tpc3a_sum,"lm3a"=d_tpc3a_sumlm,"lmer3b"=d_tpc3b_sum,"lm3b"=d_tpc3b_sumlm,"gr4"=d_tpc4_sum,"gr5a"=d_tpc5a_sum, "gr5b"=d_tpc5b_sum)
+data_d <- list("lmer" = d_tpc_sum,"lm" = d_tpc_sumlm, "lmer1"=d_tpc1_sum, "lm1"=d_tpc1_sumlm, "lmer2"=d_tpc2_sum,"lm2"=d_tpc2_sumlm, "lmer3a"=d_tpc3a_sum,"lm3a"=d_tpc3a_sumlm,"lmer3b"=d_tpc3b_sum,"lm3b"=d_tpc3b_sumlm,"gr4"=d_tpc4_sum,"gr5a"=d_tpc5a_sum, "gr5b"=d_tpc5b_sum,"gr6"=d_gr_roll6, "gr7a"=d_tpc7a_sum, "gr7b"=d_tpc7b_sum, "gr7b05"=d_tpc7b05_sum)
 
 
 #'for each data source, fit all models in: -	Boatman_2017, sharpeschoolfull_1981, modifiedgaussian_2006, oneill_1972, Thomas_2012, briere2_1999, quadratic_2008, johnsonlewin_1946 - cut cuz errors, Hinshelwood_1947, lactin2_1995 added cuz good with -ve values
@@ -1187,57 +1251,92 @@ res9 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 d_fit_results <- rbind(d_fit_results, res9)
 
 write.csv(d_fit_results, "d_fits.csv")
-#'best model according to AICc is quadratic_2008, best according to AIC is sharpeschoolfull_1981 (which doesn't work with AICc), next best with AIC was gaussian
+
+
+#'(before added 6, 7) best model according to AICc is quadratic_2008, best according to AIC is sharpeschoolfull_1981 (which doesn't work with AICc), next best with AIC was gaussian (done by hand)
 d_fits <- read.csv("d_fits.csv", header=TRUE)
 
 mean(d_fits[d_fits$mod=="quadratic_2008",]$topt)
-#21.61444
+#21.3375
 mean(d_fits[d_fits$mod=="modifiedgaussian_2006",]$topt)
-#21.47694
+#21.23562
 mean(d_fits[d_fits$mod=="sharpeschoolfull_1981",]$topt)
-#23.45139
+#23.46187
+
+d_fits[which(d_fits$aicc==min(d_fits$aicc)),]
+#X d_name rep_name         mod       aic      aicc topt
+#226 226   gr5a       R1 thomas_2012 -121.9215 -91.92155   30
+d_fits[which(d_fits$aic==min(d_fits$aic)),]
+#   X d_name rep_name         mod       aic      aicc topt
+#226 226   gr5a       R1 thomas_2012 -121.9215 -91.92155   30
+
+#find overall best fitting gr data - by median - using aicc
+d_fits_gr <- aggregate(b_fits$aicc, list(b_fits$d_name), FUN=median)
+d_fits_gr[which(b_fits_gr$x==min(b_fits_gr$x)),]
+#Group.1        x
+#9     lm1 19.55381
+d_fits_mod <- aggregate(d_fits$aicc, list(d_fits$mod), FUN=median)
+d_fits_mod[which(d_fits_mod$x==min(d_fits_mod$x)),]
+#        Group.1          x
+#7 quadratic_2008 -0.5454946
 
 
+######plot data with gr's####
+#overall lm1 was best, and quadratic fit
+#plot these to data
+b_gr<- b_tpc1_sumlm
+names(b_gr) <- c("Treatment","Rep.ID","int","sl")
 
+#plotted to original data
+p <- ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+p
+p + geom_abline(data=b_gr, aes(slope=sl, intercept=int, col=Rep.ID))
 
+d_gr<- d_tpc1_sumlm
+names(d_gr) <- c("Treatment","Rep.ID","int","sl")
+
+#plotted to original data
+p <- ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+p
+p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Rep.ID))
 
 
 ######plot tpcs#####
 library(lattice)
-xyplot(mumax ~ Treatment|Rep.ID, data=results)
+#use quadratic_2008 fits for lm1
+xyplot(sl ~ temp|rep, data=b_tpc1_sumlm)
+abline(h=25)
+xyplot(sl ~ temp|rep, data=d_tpc1_sumlm)
 
-#b
-#find means and variance
-b_gr_summary <- b_gr %>% group_by(Treatment) %>%summarise_at(vars(sl), list(avg=mean, sd=sd))
-#plot
-ggplot(b_gr_summary, aes(x=Treatment, y=avg)) +
-  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=.1) +
-  geom_line() +
-  geom_point() +
-  geom_point(aes(x=23, y=0.525), color="#2BCC41") +
-  geom_point(aes(x=29, y=0.362), color="red")
+ggplot(b_tpc1_sumlm, aes(temp, sl)) +
+  geom_point(aes(temp, sl), b_tpc1_sumlm) +
+  #geom_line(aes(temp, .fitted), col = 'blue') +
+  #facet_wrap(~model_name, labeller = labeller(model_name = label_facets_num), scales = 'free', ncol = 5) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none',
+        strip.text = element_text(hjust = 0),
+        strip.background = element_blank()) +
+  labs(x = 'Temperature (ºC)',
+       y = 'Growth Rate',
+       title='Prochlorococcus B') +
+  geom_hline(aes(yintercept = 0), linetype = 2)
 
-
-#d
-#find means and variance
-d_gr_summary <- d_gr %>% group_by(Treatment) %>%summarise_at(vars(sl), list(avg=mean, sd=sd))
-#plot
-ggplot(d_gr_summary, aes(x=Treatment, y=avg)) +
-  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=.1) +
-  geom_line() +
-  geom_point() +
-  geom_point(aes(x=23, y=0.356), color="#2BCC41") +
-  geom_point(aes(x=27, y=0.176), color="red")
-
-#d with points removed
-#find means and variance
-d_gr_cut_summary <- d_gr_cut %>% group_by(Treatment) %>%summarise_at(vars(sl), list(avg=mean, sd=sd))
-#plot
-ggplot(d_gr_cut_summary, aes(x=Treatment, y=avg)) +
-  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=.1) +
-  geom_line() +
-  geom_point() +
-  geom_point(aes(x=23, y=0.470), color="#2BCC41") +
-  geom_point(aes(x=27, y=0.176), color="red")
-
+ggplot(d_tpc1_sumlm, aes(temp, sl)) +
+  geom_point(aes(temp, sl), d_tpc1_sumlm) +
+  #geom_line(aes(temp, .fitted), col = 'blue') +
+  #facet_wrap(~model_name, labeller = labeller(model_name = label_facets_num), scales = 'free', ncol = 5) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = 'none',
+        strip.text = element_text(hjust = 0),
+        strip.background = element_blank()) +
+  labs(x = 'Temperature (ºC)',
+       y = 'Growth Rate',
+       title='Prochlorococcus D') +
+  geom_hline(aes(yintercept = 0), linetype = 2)
 
