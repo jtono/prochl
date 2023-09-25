@@ -1275,11 +1275,14 @@ d_fits_gr <- aggregate(b_fits$aicc, list(b_fits$d_name), FUN=median)
 d_fits_gr[which(b_fits_gr$x==min(b_fits_gr$x)),]
 #Group.1        x
 #9     lm1 19.55381
+d_fits_gr[which(b_fits_gr$x<20),]
+
+
 d_fits_mod <- aggregate(d_fits$aicc, list(d_fits$mod), FUN=median)
 d_fits_mod[which(d_fits_mod$x==min(d_fits_mod$x)),]
 #        Group.1          x
 #7 quadratic_2008 -0.5454946
-
+d_fits_mod[which(d_fits_mod$x<10),]
 
 ######plot data with gr's####
 #overall lm1 was best, and quadratic fit
