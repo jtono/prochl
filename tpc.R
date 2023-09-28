@@ -1530,154 +1530,304 @@ res3 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 b_fit_results <- rbind(b_fit_results, res3)
 
-###left off here####
+# #deutsch_2008
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "deutsch_2008")
 
-
-
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "deutsch_2008")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "deutsch_2008")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "deutsch_2008")
+    fit <- nls_multstart(sl~deutsch_2008(temp = temp, rmax, topt, ctmax, a),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
 
 res4 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 b_fit_results <- rbind(b_fit_results, res4)
+
+#gaussian_1987
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "gaussian_1987")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "gaussian_1987")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "gaussian_1987")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "gaussian_1987")
+    fit <- nls_multstart(sl~gaussian_1987(temp = temp,rmax, topt, a),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
 
 
 res5 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 b_fit_results <- rbind(b_fit_results, res5)
 
+#joehnk_2008
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "joehnk_2008")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "joehnk_2008")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "joehnk_2008")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "joehnk_2008")
+    fit <- nls_multstart(sl~joehnk_2008(temp = temp,rmax, topt, a, b, c),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
 res6 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 b_fit_results <- rbind(b_fit_results, res6)
 
+#johnsonlewin_1946
+# d_name <- c()
+# rep_name <- c()
+# mod <- c()
+# aic <- c()
+# aicc <- c()
+# topt <- c()
+# for (i in 1:length(data_b_lm)){
+#   for (j in unique(data_b_lm[[i]]$rep)){
+#     sub <- subset(data_b_lm[[i]], rep==j)
+#     d_name <- c(d_name,names(data_b_lm[i]))
+#     rep_name <- c(rep_name, j)
+#     mod <- c(mod, "johnsonlewin_1946")
+#
+#     # get start vals
+#     start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+#     # get limits
+#     low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+#     upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+#     fit <- nls_multstart(sl~johnsonlewin_1946(temp = temp,r0, e, eh, topt),
+#                          data = sub,
+#                          iter = 500,
+#                          start_lower = start_vals - 1,
+#                          start_upper = start_vals + 1,
+#                          lower = low_lims,
+#                          upper = upper_lims,
+#                          supp_errors = 'Y',
+#                          convergence_count=FALSE)
+#     aic <- c(aic, AIC(fit))
+#     aicc <- c(aicc, AICc(fit))
+#     param <- calc_params(fit) %>%mutate_all(round, 2)
+#     topt <- c(topt, param$topt)
+#   }
+# }
+#
+# res7 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+#
+# b_fit_results <- rbind(b_fit_results, res7)
 
+#lrf_1991
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "lrf_1991")
 
-res7 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
-
-b_fit_results <- rbind(b_fit_results, res7)
-
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "lrf_1991")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "lrf_1991")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "lrf_1991")
+    fit <- nls_multstart(sl~lrf_1991(temp = temp, rmax, topt, tmin, tmax),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
 
 res8 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 b_fit_results <- rbind(b_fit_results, res8)
 
 
+#pawar_2018
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "pawar_2018")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "pawar_2018")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "pawar_2018")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "pawar_2018")
+    fit <- nls_multstart(sl~pawar_2018(temp = temp, r_tref, e, eh, topt, tref=23),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
+
 res9 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 b_fit_results <- rbind(b_fit_results, res9)
 
-write.csv(b_fit_results, "b_fits.csv")
-#'(before added 6, 7) best model according to AICc is quadratic_2008, best according to AIC is modifiedgaussian_2006 (done by hand)
-b_fits <- read.csv("b_fits.csv", header=TRUE)
+#weibull_1995
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "weibull_1995")
 
-mean(b_fits[b_fits$mod=="quadratic_2008",]$topt)
-#23.58784
-mean(b_fits[b_fits$mod=="modifiedgaussian_2006",]$topt)
-#23.87157
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "weibull_1995")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "weibull_1995")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "weibull_1995")
+    fit <- nls_multstart(sl~weibull_1995(temp = temp, a, topt, b, c),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
 
-b_fits[which(b_fits$aicc==min(b_fits$aicc)),]
-#  X d_name rep_name            mod       aic    aicc  topt
-#349 349   gr7a       R1 quadratic_2008 -21.29823 -7.9649 24.57
-b_fits[which(b_fits$aic==min(b_fits$aic)),]
-# X d_name rep_name          mod       aic     aicc  topt
-#18 18    lm2       R3 boatman_2017 -38.80806 45.19194 24.67
+res10 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-#find overall best fitting gr data - by median - using aicc
-b_fits_gr <- aggregate(b_fits$aicc, list(b_fits$d_name), FUN=median)
-b_fits_gr[which(b_fits_gr$x==min(b_fits_gr$x)),]
-#lm1 19.55381
+b_fit_results <- rbind(b_fit_results, res10)
+
+write.csv(b_fit_results, "b_fits_lm.csv")
+
+b_fits <- read.csv("b_fits_lm.csv", header=TRUE)
+
+#find overall best fitting model - by median - using aicc
 b_fits_mod <- aggregate(b_fits$aicc, list(b_fits$mod), FUN=median)
 b_fits_mod[which(b_fits_mod$x==min(b_fits_mod$x)),]
-#quadratic_2008 5.244838
+#gaussian_1987 6.694412
 
 
+#####left off here, edit below for d######
+#######fit tpcs - b - only those with topt and using only lm - full, cut@13, cut@9#####
 
-#######fit tpcs - d#####
-#'all data sources for d:
-#'first get rid of -Inf
-d_tpc5b_sum <- d_tpc5b_sum[-which(d_tpc5b_sum$sl==-Inf),]
-#'now put together
-data_d <- list("lmer" = d_tpc_sum,"lm" = d_tpc_sumlm, "lmer1"=d_tpc1_sum, "lm1"=d_tpc1_sumlm, "lmer2"=d_tpc2_sum,"lm2"=d_tpc2_sumlm, "lmer3a"=d_tpc3a_sum,"lm3a"=d_tpc3a_sumlm,"lmer3b"=d_tpc3b_sum,"lm3b"=d_tpc3b_sumlm,"gr4"=d_tpc4_sum,"gr5a"=d_tpc5a_sum, "gr5b"=d_tpc5b_sum,"gr6"=d_gr_roll6, "gr7a"=d_tpc7a_sum, "gr7b"=d_tpc7b_sum, "gr7b05"=d_tpc7b05_sum)
+#'all data sources for b:
+data_b_lm <- list("lm" = b_tpc_sumlm, "lm1b"=b_tpc1b_sumlm, "lm1b10"=b_tpc1b10_sumlm)
 
-
-#'for each data source, fit all models in: -	Boatman_2017, sharpeschoolfull_1981, modifiedgaussian_2006, oneill_1972, Thomas_2012, briere2_1999, quadratic_2008, johnsonlewin_1946 - cut cuz errors, Hinshelwood_1947, lactin2_1995 added cuz good with -ve values
-#'extract convergence tolerance and AIC for each
-#'keep track of: dataset, rep, model, AICc
+#'for each data source, fit all models in: deutsch_2008, gaussian_1987, joehnk_2008, johnsonlewin_1946, lrf_1991, modifiedgaussian_2006, oneill_1972, pawar_2018, thomas_2012, weibull_1995
+#'keep track of: dataset, rep, model, AIC, AICc, topt
 d_name <- c()
 rep_name <- c()
 mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-
-#Boatman_2017
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
-    rep_name <- c(rep_name, j)
-    mod <- c(mod, "boatman_2017")
-
-    # get start vals
-    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "boatman_2017")
-    # get limits
-    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "boatman_2017")
-    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "boatman_2017")
-    fit <- nls_multstart(sl~boatman_2017(temp = temp, rmax, tmin, tmax, a, b),
-                         data = sub,
-                         iter = 500,
-                         start_lower = start_vals - 10,
-                         start_upper = start_vals + 10,
-                         lower = low_lims,
-                         upper = upper_lims,
-                         supp_errors = 'Y',
-                         convergence_count=FALSE)
-    aic <- c(aic, AIC(fit))
-    aicc <- c(aicc, AICc(fit))
-    param <- calc_params(fit) %>%mutate_all(round, 2)
-    topt <- c(topt, param$topt)
-  }
-}
-
-d_fit_results <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
-
-#sharpeschoolfull_1981, tref=23
-d_name <- c()
-rep_name <- c()
-mod <- c()
-aic <- c()
-aicc <- c()
-topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
-    rep_name <- c(rep_name, j)
-    mod <- c(mod, "sharpeschoolfull_1981")
-
-    # get start vals
-    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "sharpeschoolfull_1981")
-    start_vals[which(is.na(start_vals))]<-1
-    # get limits
-    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "sharpeschoolfull_1981")
-    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "sharpeschoolfull_1981")
-    fit <- nls_multstart(sl~sharpeschoolfull_1981(temp = temp, r_tref, e, e1, t1, eh, th, tref=23),
-                         data = sub,
-                         iter = 500,
-                         start_lower = start_vals - 10,
-                         start_upper = start_vals + 10,
-                         lower = low_lims,
-                         upper = upper_lims,
-                         supp_errors = 'Y',
-                         convergence_count=FALSE)
-    aic <- c(aic, AIC(fit))
-    aicc <- c(aicc, AICc(fit))
-    param <- calc_params(fit) %>%mutate_all(round, 2)
-    topt <- c(topt, param$topt)
-  }
-}
-
-res2 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
-
-d_fit_results <- rbind(d_fit_results, res2)
 
 #modifiedgaussian_2006
 d_name <- c()
@@ -1686,10 +1836,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "modifiedgaussian_2006")
 
@@ -1714,9 +1864,7 @@ for (i in 1:length(data_d)){
   }
 }
 
-res3 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
-
-d_fit_results <- rbind(d_fit_results, res3)
+b_fit_results <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 #oneill_1972
 d_name <- c()
@@ -1725,10 +1873,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "oneill_1972")
 
@@ -1753,9 +1901,9 @@ for (i in 1:length(data_d)){
   }
 }
 
-res4 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+res2 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-d_fit_results <- rbind(d_fit_results, res4)
+b_fit_results <- rbind(b_fit_results, res2)
 
 #Thomas_2012
 d_name <- c()
@@ -1764,10 +1912,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "thomas_2012")
 
@@ -1792,30 +1940,30 @@ for (i in 1:length(data_d)){
   }
 }
 
-res5 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+res3 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-d_fit_results <- rbind(d_fit_results, res5)
+b_fit_results <- rbind(b_fit_results, res3)
 
-#briere2_1999
+# #deutsch_2008
 d_name <- c()
 rep_name <- c()
 mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
-    mod <- c(mod, "briere2_1999")
+    mod <- c(mod, "deutsch_2008")
 
     # get start vals
-    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "briere2_1999")
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "deutsch_2008")
     # get limits
-    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "briere2_1999")
-    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "briere2_1999")
-    fit <- nls_multstart(sl~briere2_1999(temp = temp, tmin, tmax, a, b),
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "deutsch_2008")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "deutsch_2008")
+    fit <- nls_multstart(sl~deutsch_2008(temp = temp, rmax, topt, ctmax, a),
                          data = sub,
                          iter = 500,
                          start_lower = start_vals - 10,
@@ -1831,34 +1979,34 @@ for (i in 1:length(data_d)){
   }
 }
 
-res6 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+res4 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-d_fit_results <- rbind(d_fit_results, res6)
+b_fit_results <- rbind(b_fit_results, res4)
 
-#quadratic_2008
+#gaussian_1987
 d_name <- c()
 rep_name <- c()
 mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
-    mod <- c(mod, "quadratic_2008")
+    mod <- c(mod, "gaussian_1987")
 
     # get start vals
-    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "quadratic_2008")
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "gaussian_1987")
     # get limits
-    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "quadratic_2008")
-    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "quadratic_2008")
-    fit <- nls_multstart(sl~quadratic_2008(temp = temp, a, b, c),
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "gaussian_1987")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "gaussian_1987")
+    fit <- nls_multstart(sl~gaussian_1987(temp = temp,rmax, topt, a),
                          data = sub,
                          iter = 500,
-                         start_lower = start_vals - 0.5,
-                         start_upper = start_vals + 0.5,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
                          lower = low_lims,
                          upper = upper_lims,
                          supp_errors = 'Y',
@@ -1870,34 +2018,112 @@ for (i in 1:length(data_d)){
   }
 }
 
-res7 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-d_fit_results <- rbind(d_fit_results, res7)
+res5 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-#lactin2_1995
+b_fit_results <- rbind(b_fit_results, res5)
+
+#joehnk_2008
 d_name <- c()
 rep_name <- c()
 mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
-    mod <- c(mod, "lactin2_1995")
+    mod <- c(mod, "joehnk_2008")
 
     # get start vals
-    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "lactin2_1995")
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "joehnk_2008")
     # get limits
-    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "lactin2_1995")
-    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "lactin2_1995")
-    fit <- nls_multstart(sl~lactin2_1995(temp = temp, a, b, tmax, delta_t),
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "joehnk_2008")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "joehnk_2008")
+    fit <- nls_multstart(sl~joehnk_2008(temp = temp,rmax, topt, a, b, c),
                          data = sub,
                          iter = 500,
-                         start_lower = start_vals - 1,
-                         start_upper = start_vals + 1,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
+res6 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+
+b_fit_results <- rbind(b_fit_results, res6)
+
+#johnsonlewin_1946
+# d_name <- c()
+# rep_name <- c()
+# mod <- c()
+# aic <- c()
+# aicc <- c()
+# topt <- c()
+# for (i in 1:length(data_b_lm)){
+#   for (j in unique(data_b_lm[[i]]$rep)){
+#     sub <- subset(data_b_lm[[i]], rep==j)
+#     d_name <- c(d_name,names(data_b_lm[i]))
+#     rep_name <- c(rep_name, j)
+#     mod <- c(mod, "johnsonlewin_1946")
+#
+#     # get start vals
+#     start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+#     # get limits
+#     low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+#     upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+#     fit <- nls_multstart(sl~johnsonlewin_1946(temp = temp,r0, e, eh, topt),
+#                          data = sub,
+#                          iter = 500,
+#                          start_lower = start_vals - 1,
+#                          start_upper = start_vals + 1,
+#                          lower = low_lims,
+#                          upper = upper_lims,
+#                          supp_errors = 'Y',
+#                          convergence_count=FALSE)
+#     aic <- c(aic, AIC(fit))
+#     aicc <- c(aicc, AICc(fit))
+#     param <- calc_params(fit) %>%mutate_all(round, 2)
+#     topt <- c(topt, param$topt)
+#   }
+# }
+#
+# res7 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+#
+# b_fit_results <- rbind(b_fit_results, res7)
+
+#lrf_1991
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "lrf_1991")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "lrf_1991")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "lrf_1991")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "lrf_1991")
+    fit <- nls_multstart(sl~lrf_1991(temp = temp, rmax, topt, tmin, tmax),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
                          lower = low_lims,
                          upper = upper_lims,
                          supp_errors = 'Y',
@@ -1911,32 +2137,33 @@ for (i in 1:length(data_d)){
 
 res8 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-d_fit_results <- rbind(d_fit_results, res8)
+b_fit_results <- rbind(b_fit_results, res8)
 
-#Hinshelwood_1947
+
+#pawar_2018
 d_name <- c()
 rep_name <- c()
 mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_d)){
-  for (j in unique(data_d[[i]]$rep)){
-    sub <- subset(data_d[[i]], rep==j)
-    d_name <- c(d_name,names(data_d[i]))
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
     rep_name <- c(rep_name, j)
-    mod <- c(mod, "hinshelwood_1947")
+    mod <- c(mod, "pawar_2018")
 
     # get start vals
-    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "hinshelwood_1947")
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "pawar_2018")
     # get limits
-    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "hinshelwood_1947")
-    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "hinshelwood_1947")
-    fit <- nls_multstart(sl~hinshelwood_1947(temp = temp, a, e, b, eh),
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "pawar_2018")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "pawar_2018")
+    fit <- nls_multstart(sl~pawar_2018(temp = temp, r_tref, e, eh, topt, tref=23),
                          data = sub,
                          iter = 500,
-                         start_lower = start_vals - 1,
-                         start_upper = start_vals + 1,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
                          lower = low_lims,
                          upper = upper_lims,
                          supp_errors = 'Y',
@@ -1950,38 +2177,52 @@ for (i in 1:length(data_d)){
 
 res9 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-d_fit_results <- rbind(d_fit_results, res9)
+b_fit_results <- rbind(b_fit_results, res9)
 
-write.csv(d_fit_results, "d_fits.csv")
+#weibull_1995
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_b_lm)){
+  for (j in unique(data_b_lm[[i]]$rep)){
+    sub <- subset(data_b_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_b_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "weibull_1995")
 
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "weibull_1995")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "weibull_1995")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "weibull_1995")
+    fit <- nls_multstart(sl~weibull_1995(temp = temp, a, topt, b, c),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 10,
+                         start_upper = start_vals + 10,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
 
-#'(before added 6, 7) best model according to AICc is quadratic_2008, best according to AIC is sharpeschoolfull_1981 (which doesn't work with AICc), next best with AIC was gaussian (done by hand)
-d_fits <- read.csv("d_fits.csv", header=TRUE)
+res10 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-mean(d_fits[d_fits$mod=="quadratic_2008",]$topt)
-#21.3375
-mean(d_fits[d_fits$mod=="modifiedgaussian_2006",]$topt)
-#21.23562
-mean(d_fits[d_fits$mod=="sharpeschoolfull_1981",]$topt)
-#23.46187
+b_fit_results <- rbind(b_fit_results, res10)
 
-d_fits[which(d_fits$aicc==min(d_fits$aicc)),]
-#X d_name rep_name         mod       aic      aicc topt
-#226 226   gr5a       R1 thomas_2012 -121.9215 -91.92155   30
-d_fits[which(d_fits$aic==min(d_fits$aic)),]
-#   X d_name rep_name         mod       aic      aicc topt
-#226 226   gr5a       R1 thomas_2012 -121.9215 -91.92155   30
+write.csv(b_fit_results, "b_fits_lm.csv")
 
-#find overall best fitting gr data - by median - using aicc
-d_fits_gr <- aggregate(b_fits$aicc, list(b_fits$d_name), FUN=median)
-d_fits_gr[which(b_fits_gr$x==min(b_fits_gr$x)),]
-#Group.1        x
-#9     lm1 19.55381
-d_fits_gr[which(b_fits_gr$x<20),]
+b_fits <- read.csv("b_fits_lm.csv", header=TRUE)
 
-
-d_fits_mod <- aggregate(d_fits$aicc, list(d_fits$mod), FUN=median)
-d_fits_mod[which(d_fits_mod$x==min(d_fits_mod$x)),]
-#        Group.1          x
-#7 quadratic_2008 -0.5454946
-d_fits_mod[which(d_fits_mod$x<10),]
+#find overall best fitting model - by median - using aicc
+b_fits_mod <- aggregate(b_fits$aicc, list(b_fits$mod), FUN=median)
+b_fits_mod[which(b_fits_mod$x==min(b_fits_mod$x)),]
+#gaussian_1987 6.694412
