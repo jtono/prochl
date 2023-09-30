@@ -1814,11 +1814,11 @@ b_fits_mod[which(b_fits_mod$x==min(b_fits_mod$x)),]
 #gaussian_1987 6.694412
 
 
-#####left off here, edit below for d######
-#######fit tpcs - b - only those with topt and using only lm - full, cut@13, cut@9#####
 
-#'all data sources for b:
-data_b_lm <- list("lm" = b_tpc_sumlm, "lm1b"=b_tpc1b_sumlm, "lm1b10"=b_tpc1b10_sumlm)
+#######fit tpcs - d - only those with topt and using only lm - full, cut@13, cut@9#####
+
+#'all data sources for d:
+data_d_lm <- list("lm" = d_tpc_sumlm, "lm1b"=d_tpc1b_sumlm, "lm1b10"=d_tpc1b10_sumlm)
 
 #'for each data source, fit all models in: deutsch_2008, gaussian_1987, joehnk_2008, johnsonlewin_1946, lrf_1991, modifiedgaussian_2006, oneill_1972, pawar_2018, thomas_2012, weibull_1995
 #'keep track of: dataset, rep, model, AIC, AICc, topt
@@ -1836,10 +1836,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "modifiedgaussian_2006")
 
@@ -1864,7 +1864,7 @@ for (i in 1:length(data_b_lm)){
   }
 }
 
-b_fit_results <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+d_fit_results <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
 #oneill_1972
 d_name <- c()
@@ -1873,10 +1873,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "oneill_1972")
 
@@ -1903,7 +1903,7 @@ for (i in 1:length(data_b_lm)){
 
 res2 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res2)
+d_fit_results <- rbind(d_fit_results, res2)
 
 #Thomas_2012
 d_name <- c()
@@ -1912,10 +1912,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "thomas_2012")
 
@@ -1942,7 +1942,7 @@ for (i in 1:length(data_b_lm)){
 
 res3 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res3)
+d_fit_results <- rbind(d_fit_results, res3)
 
 # #deutsch_2008
 d_name <- c()
@@ -1951,10 +1951,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "deutsch_2008")
 
@@ -1981,7 +1981,7 @@ for (i in 1:length(data_b_lm)){
 
 res4 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res4)
+d_fit_results <- rbind(d_fit_results, res4)
 
 #gaussian_1987
 d_name <- c()
@@ -1990,10 +1990,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "gaussian_1987")
 
@@ -2021,7 +2021,7 @@ for (i in 1:length(data_b_lm)){
 
 res5 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res5)
+d_fit_results <- rbind(d_fit_results, res5)
 
 #joehnk_2008
 d_name <- c()
@@ -2030,10 +2030,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "joehnk_2008")
 
@@ -2059,46 +2059,46 @@ for (i in 1:length(data_b_lm)){
 }
 res6 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res6)
+d_fit_results <- rbind(d_fit_results, res6)
 
 #johnsonlewin_1946
-# d_name <- c()
-# rep_name <- c()
-# mod <- c()
-# aic <- c()
-# aicc <- c()
-# topt <- c()
-# for (i in 1:length(data_b_lm)){
-#   for (j in unique(data_b_lm[[i]]$rep)){
-#     sub <- subset(data_b_lm[[i]], rep==j)
-#     d_name <- c(d_name,names(data_b_lm[i]))
-#     rep_name <- c(rep_name, j)
-#     mod <- c(mod, "johnsonlewin_1946")
-#
-#     # get start vals
-#     start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
-#     # get limits
-#     low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
-#     upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
-#     fit <- nls_multstart(sl~johnsonlewin_1946(temp = temp,r0, e, eh, topt),
-#                          data = sub,
-#                          iter = 500,
-#                          start_lower = start_vals - 1,
-#                          start_upper = start_vals + 1,
-#                          lower = low_lims,
-#                          upper = upper_lims,
-#                          supp_errors = 'Y',
-#                          convergence_count=FALSE)
-#     aic <- c(aic, AIC(fit))
-#     aicc <- c(aicc, AICc(fit))
-#     param <- calc_params(fit) %>%mutate_all(round, 2)
-#     topt <- c(topt, param$topt)
-#   }
-# }
-#
-# res7 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
-#
-# b_fit_results <- rbind(b_fit_results, res7)
+d_name <- c()
+rep_name <- c()
+mod <- c()
+aic <- c()
+aicc <- c()
+topt <- c()
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
+    rep_name <- c(rep_name, j)
+    mod <- c(mod, "johnsonlewin_1946")
+
+    # get start vals
+    start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+    # get limits
+    low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+    upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = "johnsonlewin_1946")
+    fit <- nls_multstart(sl~johnsonlewin_1946(temp = temp,r0, e, eh, topt),
+                         data = sub,
+                         iter = 500,
+                         start_lower = start_vals - 1,
+                         start_upper = start_vals + 1,
+                         lower = low_lims,
+                         upper = upper_lims,
+                         supp_errors = 'Y',
+                         convergence_count=FALSE)
+    aic <- c(aic, AIC(fit))
+    aicc <- c(aicc, AICc(fit))
+    param <- calc_params(fit) %>%mutate_all(round, 2)
+    topt <- c(topt, param$topt)
+  }
+}
+
+res7 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+
+d_fit_results <- rbind(d_fit_results, res7)
 
 #lrf_1991
 d_name <- c()
@@ -2107,10 +2107,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "lrf_1991")
 
@@ -2137,7 +2137,7 @@ for (i in 1:length(data_b_lm)){
 
 res8 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res8)
+d_fit_results <- rbind(d_fit_results, res8)
 
 
 #pawar_2018
@@ -2147,10 +2147,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "pawar_2018")
 
@@ -2177,7 +2177,7 @@ for (i in 1:length(data_b_lm)){
 
 res9 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res9)
+d_fit_results <- rbind(d_fit_results, res9)
 
 #weibull_1995
 d_name <- c()
@@ -2186,10 +2186,10 @@ mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
-for (i in 1:length(data_b_lm)){
-  for (j in unique(data_b_lm[[i]]$rep)){
-    sub <- subset(data_b_lm[[i]], rep==j)
-    d_name <- c(d_name,names(data_b_lm[i]))
+for (i in 1:length(data_d_lm)){
+  for (j in unique(data_d_lm[[i]]$rep)){
+    sub <- subset(data_d_lm[[i]], rep==j)
+    d_name <- c(d_name,names(data_d_lm[i]))
     rep_name <- c(rep_name, j)
     mod <- c(mod, "weibull_1995")
 
@@ -2216,13 +2216,13 @@ for (i in 1:length(data_b_lm)){
 
 res10 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 
-b_fit_results <- rbind(b_fit_results, res10)
+d_fit_results <- rbind(d_fit_results, res10)
 
-write.csv(b_fit_results, "b_fits_lm.csv")
+write.csv(d_fit_results, "d_fits_lm.csv")
 
-b_fits <- read.csv("b_fits_lm.csv", header=TRUE)
+d_fits <- read.csv("d_fits_lm.csv", header=TRUE)
 
 #find overall best fitting model - by median - using aicc
-b_fits_mod <- aggregate(b_fits$aicc, list(b_fits$mod), FUN=median)
-b_fits_mod[which(b_fits_mod$x==min(b_fits_mod$x)),]
-#gaussian_1987 6.694412
+d_fits_mod <- aggregate(d_fits$aicc, list(d_fits$mod), FUN=median)
+d_fits_mod[which(d_fits_mod$x==min(d_fits_mod$x)),]
+#pawar_2018 0.3718584
