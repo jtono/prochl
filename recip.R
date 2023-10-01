@@ -131,32 +131,46 @@ p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 #b
 b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
 p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProB')
 p
 
 #d
 d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
 p <- ggplot(d_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProD')
 p
 
 ###########stats###############
-mod1 <- lm(b_gr$sl~d_gr$Assay.Temp*d_gr$Evo.Temp)
+
+mod1 <- lm(sl~Assay.Temp*Evo.Temp, data=b_gr)
 summary(mod1)
 anova(mod1)
-mod2 <- lm(b_gr$sl~d_gr$Treatment)
+mod2 <- lm(sl~Treatment, data=b_gr)
 summary(mod2)
 anova(mod2)
-mod3 <- lm(d_gr$sl~d_gr$Assay.Temp*d_gr$Evo.Temp)
+b_treat <- aov(mod2)
+b_treat_tk <- TukeyHSD(b_treat, conf.level=.95)
+plot(b_treat_tk)
+
+mod3 <- lm(sl~Assay.Temp*Evo.Temp, data=d_gr)
 summary(mod3)
 anova(mod3)
-mod4 <- lm(d_gr$sl~d_gr$Treatment)
+mod4 <- lm(sl~Treatment, data=d_gr)
 summary(mod4)
 anova(mod4)
+d_treat <- aov(mod4)
+d_treat_tk <- TukeyHSD(d_treat, conf.level=.95)
+plot(d_treat_tk)
 
-t.test(b_gr$)
 
-########check output######
+
+########check output - old???######
 b_o23 <- subset(b_recip, Orig.Temp=="23c")
 b_o23_con <- subset(b_o23, Treatment=="Control")
 plot(log(b_o23_con$Actual.Cell.count)~b_o23_con$day, type="b")

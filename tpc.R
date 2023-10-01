@@ -2218,17 +2218,53 @@ write.csv(d_fit_results, "d_fits_lm.csv")
 #load model fits output
 d_fits <- read.csv("d_fits_lm.csv", header=TRUE)
 
+####find topts for models of interst####
+#gaussian_1987
+gau_b <- subset(b_fits, mod=="gaussian_1987")
+mean(gau_b$topt)
+#23.19
+gau_d <- subset(d_fits, mod=="gaussian_1987")
+mean(gau_d$topt)
+#20.79111
+
+#modifiedgaussian_2006
+gau_b <- subset(b_fits, mod=="modifiedgaussian_2006")
+mean(gau_b$topt)
+#23.47222
+gau_d <- subset(d_fits, mod=="modifiedgaussian_2006")
+mean(gau_d$topt)
+#20.68111
+
+#lrf_1991
+gau_b <- subset(b_fits, mod=="lrf_1991")
+mean(gau_b$topt)
+#28.81222
+gau_d <- subset(d_fits, mod=="lrf_1991")
+mean(gau_d$topt)
+#21.11111
+
+#pawar_2018
+gau_b <- subset(b_fits, mod=="pawar_2018")
+mean(gau_b$topt)
+#25.39889
+gau_d <- subset(d_fits, mod=="pawar_2018")
+mean(gau_d$topt)
+#23.83333
+
+
+
 #####plot lm tpcs#####
+###right now this is average curve
 data_b_lm <- list("lm" = b_tpc_sumlm, "lm1b"=b_tpc1b_sumlm, "lm1b10"=b_tpc1b10_sumlm)
 #all data lm
-d <- b_tpc_sumlm
+d <- subset(d_tpc1b_sumlm, rep=="R1")
 # show the data
 ggplot(d, aes(temp, sl)) +
   geom_point() +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
-       title = 'ProB lm')
+       title = 'ProB lm13')
 
 # choose model
 mod = 'gaussian_1987'
@@ -2294,96 +2330,17 @@ ggplot(d, aes(temp, sl)) +
        title = 'ProB lm')
 
 
-
-ggplot(b_tpc1_sumlm, aes(temp, sl)) +
-  geom_point(aes(temp, sl), b_tpc1_sumlm) +
-  #geom_line(aes(temp, .fitted), col = 'blue') +
-  #facet_wrap(~model_name, labeller = labeller(model_name = label_facets_num), scales = 'free', ncol = 5) +
-  theme_bw(base_size = 12) +
-  theme(legend.position = 'none',
-        strip.text = element_text(hjust = 0),
-        strip.background = element_blank()) +
-  labs(x = 'Temperature (ºC)',
-       y = 'Growth Rate',
-       title='Prochlorococcus B') +
-  geom_hline(aes(yintercept = 0), linetype = 2)
-
-ggplot(d_tpc1_sumlm, aes(temp, sl)) +
-  geom_point(aes(temp, sl), d_tpc1_sumlm) +
-  #geom_line(aes(temp, .fitted), col = 'blue') +
-  #facet_wrap(~model_name, labeller = labeller(model_name = label_facets_num), scales = 'free', ncol = 5) +
-  theme_bw(base_size = 12) +
-  theme(legend.position = 'none',
-        strip.text = element_text(hjust = 0),
-        strip.background = element_blank()) +
-  labs(x = 'Temperature (ºC)',
-       y = 'Growth Rate',
-       title='Prochlorococcus D') +
-  geom_hline(aes(yintercept = 0), linetype = 2)
-
-
-d_fits <- nest(d, data = c(temp, sl, int)) %>%
-  mutate(gaussian = map(data, ~nls_multstart(rate~gaussian_1987(temp = temp, rmax,topt,a),
-                                                      data = .x,
-                                                      iter = 500,
-                                                      start_lower = get_start_vals(.x$temp, .x$rate, model_name = 'gaussian_1987') - 10,
-                                                      start_upper = get_start_vals(.x$temp, .x$rate, model_name = 'gaussian_1987') + 10,
-                                                      lower = get_lower_lims(.x$temp, .x$rate, model_name = 'gaussian_1987'),
-                                                      upper = get_upper_lims(.x$temp, .x$rate, model_name = 'gaussian_1987'),
-                                                      supp_errors = 'Y',
-                                                      convergence_count = FALSE)))
-
-
-# load in data
-data("chlorella_tpc")
-d <- chlorella_tpc
-
-# when scaling up our code to fit hundreds of models, its nice to have a progress bar
-# edit nls_multstart to allow for a progress bar
-nls_multstart_progress <- function(formula, data = parent.frame(), iter, start_lower,
-                                   start_upper, supp_errors = c("Y", "N"), convergence_count = 100,
-                                   control, modelweights, ...){
-  if(!is.null(pb)){
-    pb$tick()
-  }
-  nls_multstart(formula = formula, data = data, iter = iter, start_lower = start_lower,
-                start_upper = start_upper, supp_errors = supp_errors, convergence_count = convergence_count,
-                control = control, modelweights = modelweights, ...)
-}
-
-# start progress bar and estimate time it will take
-number_of_models <- 2
-number_of_curves <- length(unique(d$curve_id))
-
-# setup progress bar
-pb <- progress::progress_bar$new(total = number_of_curves*number_of_models,
-                                 clear = FALSE,
-                                 format ="[:bar] :percent :elapsedfull")
-
-# fit two chosen model formulation in rTPC
-d_fits <- nest(d, data = c(temp, rate)) %>%
-  mutate(gaussian = map(data, ~nls_multstart_progress(rate~gaussian_1987(temp = temp, rmax,topt,a),
-                        data = .x,
-                        iter = c(3,3,3),
-                        start_lower = get_start_vals(.x$temp, .x$rate, model_name = 'gaussian_1987') - 10,
-                        start_upper = get_start_vals(.x$temp, .x$rate, model_name = 'gaussian_1987') + 10,
-                        lower = get_lower_lims(.x$temp, .x$rate, model_name = 'gaussian_1987'),
-                        upper = get_upper_lims(.x$temp, .x$rate, model_name = 'gaussian_1987'),
-                        supp_errors = 'Y',
-                        convergence_count = FALSE)),
-         sharpeschoolhigh = map(data, ~nls_multstart_progress(rate~sharpeschoolhigh_1981(temp = temp, r_tref,e,eh,th, tref = 15),
-                        data = .x,
-                        iter = c(3,3,3,3),
-                        start_lower = get_start_vals(.x$temp, .x$rate, model_name = 'sharpeschoolhigh_1981') - 10,
-                        start_upper = get_start_vals(.x$temp, .x$rate, model_name = 'sharpeschoolhigh_1981') + 10,
-                        lower = get_lower_lims(.x$temp, .x$rate, model_name = 'sharpeschoolhigh_1981'),
-                        upper = get_upper_lims(.x$temp, .x$rate, model_name = 'sharpeschoolhigh_1981'),
-                        supp_errors = 'Y',
-                        convergence_count = FALSE)))
-
-
 ####many curves####
-d <- b_tpc_sumlm
+b_tpc_sumlm$method <- "b.lm"
+b_tpc1b_sumlm$method <- "b.lm13"
+b_tpc1b10_sumlm$method <- "b.lm9"
+d_tpc_sumlm$method <- "d.lm"
+d_tpc1b_sumlm$method <- "d.lm13"
+d_tpc1b10_sumlm$method <- "d.lm9"
+
+all_tpc_data <- rbind(b_tpc_sumlm, b_tpc1b_sumlm, b_tpc1b10_sumlm, d_tpc_sumlm, d_tpc1b_sumlm, d_tpc1b10_sumlm)
+
+d <- all_tpc_data
 
 # when scaling up our code to fit hundreds of models, its nice to have a progress bar
 # edit nls_multstart to allow for a progress bar
@@ -2400,7 +2357,7 @@ nls_multstart_progress <- function(formula, data = parent.frame(), iter, start_l
 
 # start progress bar and estimate time it will take
 number_of_models <- 1
-number_of_curves <- length(unique(d$rep))
+number_of_curves <- length(unique(d$rep))*length(unique(d$method))
 
 # setup progress bar
 pb <- progress::progress_bar$new(total = number_of_curves*number_of_models,
@@ -2428,7 +2385,7 @@ d_preds <- mutate(d_fits, new_data = map(data, ~tibble(temp = seq(min(.x$temp), 
   # this uses both fit and new_data list columns
   mutate(preds = map2(fit, new_data, ~augment(.x, newdata = .y))) %>%
   # select only the columns we want to keep
-  select(rep, model_name, preds) %>%
+  select(rep, method, model_name, preds) %>%
   # unlist the preds list column
   unnest(preds)
 
@@ -2438,13 +2395,13 @@ glimpse(d_preds)
 ggplot(d_preds) +
   geom_line(aes(temp, .fitted, col = model_name)) +
   geom_point(aes(temp, sl), d) +
-  facet_wrap(~rep, scales = 'free_y', ncol = 6) +
+  facet_wrap(~rep*method, scales = 'free_y', ncol = 6) +
   theme_bw() +
   theme(legend.position = 'none') +
   scale_color_brewer(type = 'qual', palette = 2) +
   labs(x = 'Temperature (ºC)',
        y = 'Metabolic rate',
-       title = 'All fitted thermal performance curves',
-       subtitle = 'gaussian in green; sharpeschoolhigh in orange')
+       title = 'All fitted thermal performance curves')
+
 
 
