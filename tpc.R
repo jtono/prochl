@@ -2215,17 +2215,21 @@ res10 <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
 d_fit_results <- rbind(d_fit_results, res10)
 #write output to a file
 write.csv(d_fit_results, "d_fits_lm.csv")
-#load model fits output
-d_fits <- read.csv("d_fits_lm.csv", header=TRUE)
+
 
 ####find topts for models of interst####
+
+#load model fits output
+b_fits <- read.csv("b_fits_lm.csv", header=TRUE)
+d_fits <- read.csv("d_fits_lm.csv", header=TRUE)
+
 #gaussian_1987
-gau_b <- subset(b_fits, mod=="gaussian_1987")
+gau_b <- subset(b_fits, mod=="gaussian_1987"&d_name=="lm1b")
 mean(gau_b$topt)
-#23.19
-gau_d <- subset(d_fits, mod=="gaussian_1987")
+#23.27333
+gau_d <- subset(d_fits, mod=="gaussian_1987"&d_name=="lm1b")
 mean(gau_d$topt)
-#20.79111
+#21.08
 
 #modifiedgaussian_2006
 gau_b <- subset(b_fits, mod=="modifiedgaussian_2006")
@@ -2356,7 +2360,7 @@ nls_multstart_progress <- function(formula, data = parent.frame(), iter, start_l
 }
 
 # start progress bar and estimate time it will take
-number_of_models <- 1
+number_of_models <- 2
 number_of_curves <- length(unique(d$rep))*length(unique(d$method))
 
 # setup progress bar
@@ -2366,7 +2370,7 @@ pb <- progress::progress_bar$new(total = number_of_curves*number_of_models,
 
 # fit two chosen model formulation in rTPC
 d_fits <- nest(d, data = c(temp, sl, int)) %>%
-  mutate(gaussian = map(data, ~nls_multstart_progress(sl~gaussian_1987(temp = temp, rmax,topt,a),
+  mutate(gaussian = map(data, ~nls_multstart(sl~gaussian_1987(temp = temp, rmax,topt,a),
                                                       data = .x,
                                                       iter = c(3,3,3),
                                                       start_lower = get_start_vals(.x$temp, .x$sl, model_name = 'gaussian_1987') - 10,
@@ -2374,13 +2378,23 @@ d_fits <- nest(d, data = c(temp, sl, int)) %>%
                                                       lower = get_lower_lims(.x$temp, .x$sl, model_name = 'gaussian_1987'),
                                                       upper = get_upper_lims(.x$temp, .x$sl, model_name = 'gaussian_1987'),
                                                       supp_errors = 'Y',
-                                                      convergence_count = FALSE)))
+                                                      convergence_count = FALSE)),
+         lrf = map(data, ~nls_multstart(sl~lrf_1991(temp = temp, rmax, topt, tmin, tmax),
+                                                 data = .x,
+                                                 iter = 500,
+                                                 start_lower = get_start_vals(.x$temp, .x$sl, model_name = 'lrf_1991') - 10,
+                                                 start_upper = get_start_vals(.x$temp, .x$sl, model_name = 'lrf_1991') + 10,
+                                                 lower = get_lower_lims(.x$temp, .x$sl, model_name = 'lrf_1991'),
+                                                 upper = get_upper_lims(.x$temp, .x$sl, model_name = 'lrf_1991'),
+                                                 supp_errors = 'Y',
+                                                 convergence_count = FALSE)))
+
 
 d_preds <- mutate(d_fits, new_data = map(data, ~tibble(temp = seq(min(.x$temp), max(.x$temp), length.out = 100)))) %>%
   # get rid of original data column
   select(., -data) %>%
   # stack models into a single column, with an id column for model_name
-  pivot_longer(., names_to = 'model_name', values_to = 'fit', c(gaussian)) %>%
+  pivot_longer(., names_to = 'model_name', values_to = 'fit', c(gaussian, lrf)) %>%
   # create new list column containing the predictions
   # this uses both fit and new_data list columns
   mutate(preds = map2(fit, new_data, ~augment(.x, newdata = .y))) %>%
@@ -2402,6 +2416,8 @@ ggplot(d_preds) +
   labs(x = 'Temperature (ºC)',
        y = 'Metabolic rate',
        title = 'All fitted thermal performance curves')
+
+
 
 
 

@@ -59,11 +59,13 @@ d_recip$rep <- paste(d_recip$Rep.ID,d_recip$Evo.Temp)
 ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
   geom_line(aes(group=rep))+
+  geom_vline(xintercept=10.5)+
   facet_wrap(~Assay.Temp)
 
 ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
   geom_line(aes(group=rep))+
+  geom_vline(xintercept=10.5)+
   facet_wrap(~Assay.Temp)
 
 #####fit lines####
@@ -126,6 +128,69 @@ p <- ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
 p
 p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 
+#basic regression line - by replicate - cutoff at 10
+b_recip10 <- subset(b_recip, day<10.5)
+#for b
+rep <- c()
+Assay.Temp <- c()
+int <- c()
+sl <- c()
+Evo.Temp <- c()
+for (i in unique(b_recip10$rep)){
+  sub <- subset(b_recip10, rep==i)
+  for (j in unique(sub$Assay.Temp)){
+    sub2 <- subset(sub, Assay.Temp==j)
+    mod <- lm(log(Actual.Cell.count)~day, sub2)
+    int <- c(int, mod$coefficients[1])
+    sl <- c(sl, mod$coefficients[2])
+    rep <- c(rep, i)
+    Assay.Temp <- c(Assay.Temp, j)
+    Evo.Temp <- c(Evo.Temp, sub2$Evo.Temp[1])
+  }
+}
+
+b_gr10 <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
+names(b_gr10) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
+
+p <- ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
+  geom_point()+
+  geom_line(aes(group=rep))+
+  facet_wrap(~Assay.Temp)
+p
+p + geom_abline(data=b_gr10, aes(slope=sl, intercept=int, col=Evo.Temp))
+p + geom_abline(data=b_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
+
+d_recip10 <- subset(d_recip, day<10.5)
+#for d
+rep <- c()
+Assay.Temp <- c()
+int <- c()
+sl <- c()
+Evo.Temp <- c()
+for (i in unique(d_recip10$rep)){
+  sub <- subset(d_recip10, rep==i)
+  for (j in unique(sub$Assay.Temp)){
+    sub2 <- subset(sub, Assay.Temp==j)
+    mod <- lm(log(Actual.Cell.count)~day, sub2)
+    int <- c(int, mod$coefficients[1])
+    sl <- c(sl, mod$coefficients[2])
+    rep <- c(rep, i)
+    Assay.Temp <- c(Assay.Temp, j)
+    Evo.Temp <- c(Evo.Temp, sub2$Evo.Temp[1])
+  }
+}
+
+d_gr10 <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
+names(d_gr10) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
+
+p <- ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
+  geom_point()+
+  geom_line(aes(group=rep))+
+  facet_wrap(~Assay.Temp)
+p
+p + geom_abline(data=d_gr10, aes(slope=sl, intercept=int, col=Evo.Temp))
+p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
+
 
 ######plot grs#####
 #b
@@ -137,9 +202,25 @@ p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
        title = 'ProB')
 p
 
+b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
+p <- ggplot(b_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProB')
+p
+
 #d
 d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
 p <- ggplot(d_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProD')
+p
+
+d_gr10$Treatment <- paste(d_gr10$Evo.Temp, "@",d_gr10$Assay.Temp)
+p <- ggplot(d_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
   geom_boxplot()+
   labs(x = 'Treatment',
        y = 'Growth rate',
@@ -167,6 +248,27 @@ anova(mod4)
 d_treat <- aov(mod4)
 d_treat_tk <- TukeyHSD(d_treat, conf.level=.95)
 plot(d_treat_tk)
+
+
+mod110 <- lm(sl~Assay.Temp*Evo.Temp, data=b_gr10)
+summary(mod110)
+anova(mod110)
+mod210 <- lm(sl~Treatment, data=b_gr10)
+summary(mod210)
+anova(mod210)
+b_treat10 <- aov(mod210)
+b_treat_tk10 <- TukeyHSD(b_treat10, conf.level=.95)
+plot(b_treat_tk10)
+
+mod310 <- lm(sl~Assay.Temp*Evo.Temp, data=d_gr10)
+summary(mod310)
+anova(mod310)
+mod410 <- lm(sl~Treatment, data=d_gr10)
+summary(mod410)
+anova(mod410)
+d_treat10 <- aov(mod410)
+d_treat_tk10 <- TukeyHSD(d_treat10, conf.level=.95)
+plot(d_treat_tk10)
 
 
 
