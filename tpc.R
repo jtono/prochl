@@ -2408,6 +2408,15 @@ ggplot(d_tpc1b_sumlm, aes(temp, sl)) +
        y = 'Growth rate',
        title = 'ProD lm cutoff13')
 
+#####lm1b tpc mixed fx model#####
+b_tpc1b_sumlm$method <- "b.lm13"
+d_tpc1b_sumlm$method <- "d.lm13"
+both_tpc1b_sumlm <- rbind(b_tpc1b_sumlm, d_tpc1b_sumlm)
+
+temp, rmax, topt, a)
+
+sl~rmax*exp((-0.5)*(abs(temp-)))
+
 
 ####many curves####
 b_tpc_sumlm$method <- "b.lm"
