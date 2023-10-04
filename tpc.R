@@ -2255,6 +2255,152 @@ gau_d <- subset(d_fits, mod=="pawar_2018")
 mean(gau_d$topt)
 #23.83333
 
+#####lm1b tpc each indiv#####
+
+#"lm1b"=b_tpc1b_sumlm
+
+# show the data
+ggplot(b_tpc1b_sumlm, aes(temp, sl)) +
+  geom_point() +
+  theme_bw(base_size = 12) +
+  labs(x = 'Temperature (ºC)',
+       y = 'Growth rate',
+       title = 'ProB lm cutoff13')
+
+# choose model
+mod = 'gaussian_1987'
+
+params_b <- data.frame()
+for (i in unique(b_tpc1b_sumlm$rep)){
+  sub <- subset(b_tpc1b_sumlm, rep==i)
+# get start vals
+start_vals <- get_start_vals(sub$temp, sub$sl, model_name = 'gaussian_1987')
+
+# get limits
+low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = 'gaussian_1987')
+upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = 'gaussian_1987')
+
+# fit model
+fit <- nls_multstart(sl~gaussian_1987(temp = temp, rmax, topt, a),
+                     data = sub,
+                     iter = 500,
+                     start_lower = start_vals - 10,
+                     start_upper = start_vals + 10,
+                     lower = low_lims,
+                     upper = upper_lims,
+                     supp_errors = 'Y',
+                     convergence_count=FALSE)
+
+
+# calculate additional traits
+par <- calc_params(fit) %>%
+  # round for easy viewing
+  mutate_all(round, 2)
+#  rmax  topt ctmin ctmax    e   eh  q10 thermal_safety_margin thermal_tolerance breadth skewness
+#1 0.66 23.27 12.76 33.79 1.08 1.82 4.31                 10.51             21.03    5.76    -0.73
+par$rep <- i
+params_b <- rbind(params_b, par)
+}
+
+#"lm1b"=d_tpc1b_sumlm
+# show the data
+ggplot(d_tpc1b_sumlm, aes(temp, sl)) +
+  geom_point() +
+  theme_bw(base_size = 12) +
+  labs(x = 'Temperature (ºC)',
+       y = 'Growth rate',
+       title = 'ProD lm cutoff13')
+
+# choose model
+mod = 'gaussian_1987'
+
+params_d <- data.frame()
+for (i in unique(d_tpc1b_sumlm$rep)){
+  sub <- subset(d_tpc1b_sumlm, rep==i)
+  # get start vals
+  start_vals <- get_start_vals(sub$temp, sub$sl, model_name = 'gaussian_1987')
+
+  # get limits
+  low_lims <- get_lower_lims(sub$temp, sub$sl, model_name = 'gaussian_1987')
+  upper_lims <- get_upper_lims(sub$temp, sub$sl, model_name = 'gaussian_1987')
+
+  # fit model
+  fit <- nls_multstart(sl~gaussian_1987(temp = temp, rmax, topt, a),
+                       data = sub,
+                       iter = 500,
+                       start_lower = start_vals - 10,
+                       start_upper = start_vals + 10,
+                       lower = low_lims,
+                       upper = upper_lims,
+                       supp_errors = 'Y',
+                       convergence_count=FALSE)
+
+
+  # calculate additional traits
+  par <- calc_params(fit) %>%
+    # round for easy viewing
+    mutate_all(round, 2)
+  #  rmax  topt ctmin ctmax    e   eh  q10 thermal_safety_margin thermal_tolerance breadth skewness
+  #1 0.66 23.27 12.76 33.79 1.08 1.82 4.31                 10.51             21.03    5.76    -0.73
+  par$rep <- i
+  params_d <- rbind(params_d, par)
+}
+
+params_b$strain <- "ProB"
+params_d$strain <- "ProD"
+
+params <- rbind(params_b, params_d)
+
+write.csv(params, "params_lmcut13.csv")
+
+#find mean
+mean(params_b$topt)
+#23.27333
+mean(params_d$topt)
+#21.08
+#find SEM
+
+sd(params_b$topt)
+#0.06429101
+sd(params_d$topt)
+#0.01
+
+
+#find width = tolerance
+mean(params_b$thermal_tolerance)
+#21.03333
+mean(params_d$thermal_tolerance)
+#21.03667
+
+
+sd(params_b$thermal_tolerance)
+#0.6047589
+sd(params_d$thermal_tolerance)
+#0.1001665
+
+
+
+aggregate(b_tpc1b_sumlm$sl, list(b_tpc1b_sumlm$temp), FUN=mean)
+# Group.1           x
+# 1      15  0.02709812
+# 2      18  0.36726280
+# 3      20  0.52548169
+# 4      23  0.55517392
+# 5      25  0.62203350
+# 6      27  0.51795036
+# 7      29  0.40107908
+# 8      30 -0.01190350
+
+aggregate(d_tpc1b_sumlm$sl, list(d_tpc1b_sumlm$temp), FUN=mean)
+# Group.1          x
+# 1      15 0.26060243
+# 2      18 0.37011000
+# 3      20 0.41808373
+# 4      23 0.47083373
+# 5      25 0.45945424
+# 6      27 0.12932847
+# 7      29 0.01275246
+# 8      30 0.01940297
 
 
 #####lm1b tpc average#####
@@ -2408,7 +2554,7 @@ ggplot(d_tpc1b_sumlm, aes(temp, sl)) +
        y = 'Growth rate',
        title = 'ProD lm cutoff13')
 
-#####lm1b tpc mixed fx model#####
+#####lm1b tpc mixed fx model - ask Gab for help#####
 b_tpc1b_sumlm$method <- "b.lm13"
 d_tpc1b_sumlm$method <- "d.lm13"
 both_tpc1b_sumlm <- rbind(b_tpc1b_sumlm, d_tpc1b_sumlm)
