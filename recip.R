@@ -1,6 +1,6 @@
 library(ggplot2)
 library(dplyr)
-
+library("multcompView")
 #####getting data ready#####
 #read in data
 b_recip <- read.csv("Pc_B_Recip.csv", sep=",", as.is=TRUE, header=TRUE)
@@ -192,40 +192,7 @@ p + geom_abline(data=d_gr10, aes(slope=sl, intercept=int, col=Evo.Temp))
 p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 
 
-######plot grs#####
-#b
-b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
-p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()+
-  labs(x = 'Treatment',
-       y = 'Growth rate',
-       title = 'ProB')
-p
 
-b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
-p <- ggplot(b_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()+
-  labs(x = 'Treatment',
-       y = 'Growth rate',
-       title = 'ProB')
-p
-
-#d
-d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
-p <- ggplot(d_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()+
-  labs(x = 'Treatment',
-       y = 'Growth rate',
-       title = 'ProD')
-p
-
-d_gr10$Treatment <- paste(d_gr10$Evo.Temp, "@",d_gr10$Assay.Temp)
-p <- ggplot(d_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()+
-  labs(x = 'Treatment',
-       y = 'Growth rate',
-       title = 'ProD')
-p
 
 ###########stats###############
 
@@ -261,6 +228,83 @@ summary(aov.model410)
 d_treat_tk10 <- TukeyHSD(aov.model410, conf.level=.95)
 plot(d_treat_tk10)
 write.csv(d_treat_tk10$Treatment, "d_treat_tk10.csv")
+
+
+
+
+
+######plot grs - boxplots with tukey letters#####
+#b
+b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
+p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProB')
+p
+
+b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
+p <- ggplot(b_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProB')
+p
+
+#d
+d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
+p <- ggplot(d_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProD')
+p
+
+letters.df <- data.frame(multcompLetters(TukeyHSD(aov.model410, conf.level=.95)$Treatment[,4])$Letters)
+colnames(letters.df)[1] <- "Letter" #Reassign column name
+letters.df$Treatment <- rownames(letters.df) #Create column based on rownames
+placement <- d_gr10 %>% #We want to create a dataframe to assign the letter position.
+  group_by(Treatment) %>%
+  summarise(quantile(sl)[4])
+colnames(placement)[2] <- "Placement.Value"
+letters.df <- left_join(letters.df, placement) #Merge dataframes
+
+p <- ggplot(d_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot(alpha=0)+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProD')+
+  geom_text(data = letters.df, aes(x = Treatment, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = -1.25, vjust = -0.8, fontface = "bold")
+p
+
+########find one ProD replicate with low growth - rerun analysis with omitted#########
+d_gr10[which(d_gr10$sl<0.2),]
+#Assay.Temp   Rep      int        sl Evo.Temp Treatment
+#2         27c R1 23 7.311519 0.1960166       23  23 @ 27c
+#23        27c R6 27 6.882175 0.1583683       27  27 @ 27c
+
+d_gr10[d_gr10$Rep=="R6 27",]
+# Assay.Temp   Rep      int        sl Evo.Temp Treatment
+#23        27c R6 27 6.882175 0.1583683       27  27 @ 27c
+#24        23c R6 27 6.657928 0.3936455       27  27 @ 23c
+#this replicate lower in both
+
+d_gr10_noout <- d_gr10[-which(d_gr10$Rep=="R6 27"),]
+
+p <- ggplot(d_gr10_noout, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+  geom_boxplot()+
+  labs(x = 'Treatment',
+       y = 'Growth rate',
+       title = 'ProD')
+p
+
+aov.model310.noout <- aov(sl~Assay.Temp*Evo.Temp, data=d_gr10_noout)
+summary(aov.model310.noout)
+aov.model410.noout <- aov(sl~Treatment, data=d_gr10_noout)
+summary(aov.model410.noout)
+d_treat_tk10_noout <- TukeyHSD(aov.model410.noout, conf.level=.95)
+plot(d_treat_tk10_noout)
+write.csv(d_treat_tk10_noout$Treatment, "d_treat_tk10_noout.csv")
 
 
 
