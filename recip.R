@@ -234,8 +234,12 @@ write.csv(d_treat_tk10$Treatment, "d_treat_tk10.csv")
 
 
 ######plot grs - boxplots with tukey letters#####
-#b
 b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
+b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
+d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
+d_gr10$Treatment <- paste(d_gr10$Evo.Temp, "@",d_gr10$Assay.Temp)
+#b
+
 p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
   geom_boxplot()+
   labs(x = 'Treatment',
@@ -243,16 +247,30 @@ p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
        title = 'ProB')
 p
 
-b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
+letters.df <- data.frame(multcompLetters(TukeyHSD(aov.model210, conf.level=.95)$Treatment[,4])$Letters)
+colnames(letters.df)[1] <- "Letter" #Reassign column name
+letters.df$Treatment <- rownames(letters.df) #Create column based on rownames
+placement <- b_gr10 %>% #We want to create a dataframe to assign the letter position.
+  group_by(Treatment) %>%
+  summarise(quantile(sl)[4])
+colnames(placement)[2] <- "Placement.Value"
+letters.df <- left_join(letters.df, placement) #Merge dataframes
+
+
 p <- ggplot(b_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
   geom_boxplot()+
   labs(x = 'Treatment',
        y = 'Growth rate',
-       title = 'ProB')
+       title = 'ProB')+
+  geom_text(data = letters.df, aes(x = Treatment, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = -1.25, vjust = -0.8, fontface = "bold")
 p
 
+
+
+
+
 #d
-d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
+
 p <- ggplot(d_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
   geom_boxplot()+
   labs(x = 'Treatment',
