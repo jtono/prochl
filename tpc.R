@@ -2468,12 +2468,12 @@ calc_params(fit) %>%
 
 # predict new data
 new_data <- data.frame(temp = seq(min(b_tpc1b_sumlm$temp), max(b_tpc1b_sumlm$temp), 0.5))
-preds <- augment(fit, newdata = new_data)
+preds_B <- augment(fit, newdata = new_data)
 
 # plot data and model fit
 ggplot(b_tpc1b_sumlm, aes(temp, sl)) +
   geom_point() +
-  geom_line(aes(temp, .fitted), preds, col = 'blue') +
+  geom_line(aes(temp, .fitted), preds_B, col = 'blue') +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
@@ -2543,12 +2543,12 @@ calc_params(fit) %>%
 
 # predict new data
 new_data <- data.frame(temp = seq(min(d_tpc1b_sumlm$temp), max(d_tpc1b_sumlm$temp), 0.5))
-preds <- augment(fit, newdata = new_data)
+preds_D <- augment(fit, newdata = new_data)
 
 # plot data and model fit
 ggplot(d_tpc1b_sumlm, aes(temp, sl)) +
   geom_point() +
-  geom_line(aes(temp, .fitted), preds, col = 'blue') +
+  geom_line(aes(temp, .fitted), preds_D, col = 'blue') +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
@@ -2563,8 +2563,67 @@ temp, rmax, topt, a)
 
 sl~rmax*exp((-0.5)*(abs(temp-)))
 
+####many curves - together####
+b_tpc1b_sumlm$method <- "b.lm13"
+d_tpc1b_sumlm$method <- "d.lm13"
 
-####many curves####
+#only lm13
+b_tpc1b_sumlm$strain <- "ProB"
+d_tpc1b_sumlm$strain <- "ProD"
+tpc_data13 <- rbind(b_tpc1b_sumlm,d_tpc1b_sumlm)
+d <- tpc_data13
+
+
+# fit chosen model formulation in rTPC
+d_fits <- nest(d, data = c(temp, sl, int)) %>%
+  mutate(gaussian = map(data, ~nls_multstart(sl~gaussian_1987(temp = temp, rmax,topt,a),
+                                             data = .x,
+                                             iter = c(3,3,3),
+                                             start_lower = get_start_vals(.x$temp, .x$sl, model_name = 'gaussian_1987') - 10,
+                                             start_upper = get_start_vals(.x$temp, .x$sl, model_name = 'gaussian_1987') + 10,
+                                             lower = get_lower_lims(.x$temp, .x$sl, model_name = 'gaussian_1987'),
+                                             upper = get_upper_lims(.x$temp, .x$sl, model_name = 'gaussian_1987'),
+                                             supp_errors = 'Y',
+                                             convergence_count = FALSE)))
+
+
+d_preds <- mutate(d_fits, new_data = map(data, ~tibble(temp = seq(min(.x$temp), max(.x$temp), length.out = 100)))) %>%
+  # get rid of original data column
+  select(., -data) %>%
+  # stack models into a single column, with an id column for model_name
+  pivot_longer(., names_to = 'model_name', values_to = 'fit', c(gaussian)) %>%
+  # create new list column containing the predictions
+  # this uses both fit and new_data list columns
+  mutate(preds = map2(fit, new_data, ~augment(.x, newdata = .y))) %>%
+  # select only the columns we want to keep
+  select(rep, method, strain, preds) %>%
+  # unlist the preds list column
+  unnest(preds)
+
+glimpse(d_preds)
+
+# plot
+preds_BD <- mutate(preds_B, strain="ProB") %>%
+  bind_rows(mutate(preds_D, strain="ProD"))
+
+ggplot(d_preds) +
+  geom_point(aes(temp, sl, col=rep), d) +
+  geom_line(aes(temp, .fitted, group=rep, col=rep)) +
+  geom_line(aes(temp, .fitted), preds_BD, col = 'black') +
+  facet_wrap(~strain, scales = 'free_y', ncol = 2) +
+  theme_bw() +
+  theme(legend.position = 'none') +
+  scale_color_brewer(type = 'qual', palette = 2) +
+  labs(x = 'Temperature (ºC)',
+       y = 'Metabolic rate',
+       title = 'All fitted thermal performance curves')
+
+
+
+
+
+
+####many curves - all separate####
 b_tpc_sumlm$method <- "b.lm"
 b_tpc1b_sumlm$method <- "b.lm13"
 b_tpc1b10_sumlm$method <- "b.lm9"
@@ -2573,8 +2632,9 @@ d_tpc1b_sumlm$method <- "d.lm13"
 d_tpc1b10_sumlm$method <- "d.lm9"
 
 all_tpc_data <- rbind(b_tpc_sumlm, b_tpc1b_sumlm, b_tpc1b10_sumlm, d_tpc_sumlm, d_tpc1b_sumlm, d_tpc1b10_sumlm)
-
-d <- all_tpc_data
+#only lm13
+tpc_data13 <- rbind(b_tpc1b_sumlm,d_tpc1b_sumlm)
+d <- tpc_data13
 
 # when scaling up our code to fit hundreds of models, its nice to have a progress bar
 # edit nls_multstart to allow for a progress bar
