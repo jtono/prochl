@@ -2,12 +2,16 @@ library(ggplot2)
 library(dplyr)
 library(lme4)
 library(tidyverse) #install.packages(tidyverse)
+library(MetBrewer)
 library(zoo) #install.packages(zoo)
 library(broom) #install.packages(broom)
 library(nls.multstart) # install.packages(nls.multstart)
 library(rTPC)
 library("growthrates")
 library(MuMIn)
+library(patchwork)
+library(geomtextpath)
+
 ########functions########
 getslopes <- function(data){
   treatment <- c()
@@ -2710,43 +2714,41 @@ aggregate(d_tpc1b10_sumlm$sl, list(d_tpc1b10_sumlm$temp), FUN=mean)
 # 8      30 0.02142525
 
 
-#####lm1b tpc average#####
-
-#"lm1b"=b_tpc1b_sumlm
+#####lm1b10 tpc average#####
 
 
 # show the data
-ggplot(b_tpc1b_sumlm, aes(temp, sl)) +
+ggplot(b_tpc1b10_sumlm, aes(temp, sl)) +
   geom_point() +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
-       title = 'ProB lm cutoff13')
+       title = 'ProB lm cutoff10')
 
 # choose model
 mod = 'gaussian_1987'
 
 # get start vals
-start_vals <- get_start_vals(b_tpc1b_sumlm$temp, b_tpc1b_sumlm$sl, model_name = 'gaussian_1987')
+start_vals <- get_start_vals(b_tpc1b10_sumlm$temp, b_tpc1b10_sumlm$sl, model_name = 'gaussian_1987')
 
 # get limits
-low_lims <- get_lower_lims(b_tpc1b_sumlm$temp, b_tpc1b_sumlm$sl, model_name = 'gaussian_1987')
-upper_lims <- get_upper_lims(b_tpc1b_sumlm$temp, b_tpc1b_sumlm$sl, model_name = 'gaussian_1987')
+low_lims <- get_lower_lims(b_tpc1b10_sumlm$temp, b_tpc1b10_sumlm$sl, model_name = 'gaussian_1987')
+upper_lims <- get_upper_lims(b_tpc1b10_sumlm$temp, b_tpc1b10_sumlm$sl, model_name = 'gaussian_1987')
 
 start_vals
 # rmax       topt          a
-#0.6228499 25.0000000 15.0000000
+#0.6582842 25.0000000 15.0000000
 low_lims
-#     rmax       topt          a
-#-0.0199472 15.0000000  0.0000000
+#  rmax        topt           a
+#-0.03435332 15.00000000  0.00000000
 
 upper_lims
-#   rmax       topt          a
-#6.228499  30.000000 150.000000
+#  rmax       topt          a
+#6.582842  30.000000 150.000000
 
 # fit model
 fit <- nls_multstart(sl~gaussian_1987(temp = temp, rmax, topt, a),
-                     data = b_tpc1b_sumlm,
+                     data = b_tpc1b10_sumlm,
                      iter = 500,
                      start_lower = start_vals - 10,
                      start_upper = start_vals + 10,
@@ -2757,71 +2759,71 @@ fit <- nls_multstart(sl~gaussian_1987(temp = temp, rmax, topt, a),
 
 fit
 #Nonlinear regression model
-#model: sl ~ gaussian_1987(temp = temp, rmax, topt, a)
-#data: data
-#rmax    topt       a
-#0.6557 23.2745  4.2936
-#residual sum-of-squares: 0.2638
-
-#Number of iterations to convergence: 22
-#Achieved convergence tolerance: 1.49e-08
+# model: sl ~ gaussian_1987(temp = temp, rmax, topt, a)
+# data: data
+# rmax    topt       a
+# 0.6564 23.3443  4.1617
+# residual sum-of-squares: 0.2439
+#
+# Number of iterations to convergence: 17
+# Achieved convergence tolerance: 1.49e-08
 
 # calculate additional traits
 calc_params(fit) %>%
   # round for easy viewing
   mutate_all(round, 2)
-#  rmax  topt ctmin ctmax    e   eh  q10 thermal_safety_margin thermal_tolerance breadth skewness
-#1 0.66 23.27 12.76 33.79 1.08 1.82 4.31                 10.51             21.03    5.76    -0.73
+#rmax  topt ctmin ctmax   e   eh  q10 thermal_safety_margin thermal_tolerance breadth skewness
+#1 0.66 23.34 13.15 33.54 1.1 1.97 4.42                 10.19             20.39     5.6    -0.87
 
 # predict new data
-new_data <- data.frame(temp = seq(min(b_tpc1b_sumlm$temp), max(b_tpc1b_sumlm$temp), 0.5))
-preds_B <- augment(fit, newdata = new_data)
+new_data <- data.frame(temp = seq(min(b_tpc1b10_sumlm$temp), max(b_tpc1b10_sumlm$temp), 0.5))
+preds_B10 <- augment(fit, newdata = new_data)
 
 # plot data and model fit
-ggplot(b_tpc1b_sumlm, aes(temp, sl)) +
+ggplot(b_tpc1b10_sumlm, aes(temp, sl)) +
   geom_point() +
-  geom_line(aes(temp, .fitted), preds_B, col = 'blue') +
+  geom_line(aes(temp, .fitted), preds_B10, col = 'blue') +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
-       title = 'ProB lm cutoff13')
+       title = 'ProB lm cutoff10')
 
 
-#"lm1b"=d_tpc1b_sumlm
+
 
 
 # show the data
-ggplot(d_tpc1b_sumlm, aes(temp, sl)) +
+ggplot(d_tpc1b10_sumlm, aes(temp, sl)) +
   geom_point() +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
-       title = 'ProD lm cutoff13')
+       title = 'ProD lm cutoff10')
 
 # choose model
 mod = 'gaussian_1987'
 
 # get start vals
-start_vals <- get_start_vals(d_tpc1b_sumlm$temp, d_tpc1b_sumlm$sl, model_name = 'gaussian_1987')
+start_vals <- get_start_vals(d_tpc1b10_sumlm$temp, d_tpc1b10_sumlm$sl, model_name = 'gaussian_1987')
 
 # get limits
-low_lims <- get_lower_lims(d_tpc1b_sumlm$temp, d_tpc1b_sumlm$sl, model_name = 'gaussian_1987')
-upper_lims <- get_upper_lims(d_tpc1b_sumlm$temp, d_tpc1b_sumlm$sl, model_name = 'gaussian_1987')
+low_lims <- get_lower_lims(d_tpc1b10_sumlm$temp, d_tpc1b10_sumlm$sl, model_name = 'gaussian_1987')
+upper_lims <- get_upper_lims(d_tpc1b10_sumlm$temp, d_tpc1b10_sumlm$sl, model_name = 'gaussian_1987')
 
 start_vals
 #rmax       topt          a
-#0.4799139 23.0000000 15.0000000
+#0.4667087 23.0000000 15.0000000
 low_lims
-#      rmax         topt            a
-#0.006645832 15.000000000  0.000000000
+#  rmax        topt           a
+#0.01163303 15.00000000  0.00000000
 
 upper_lims
-#  rmax       topt          a
-#4.799139  30.000000 150.000000
+#rmax       topt          a
+#4.667087  30.000000 150.000000
 
 # fit model
 fit <- nls_multstart(sl~gaussian_1987(temp = temp, rmax, topt, a),
-                     data = d_tpc1b_sumlm,
+                     data = d_tpc1b10_sumlm,
                      iter = 500,
                      start_lower = start_vals - 10,
                      start_upper = start_vals + 10,
@@ -2832,34 +2834,35 @@ fit <- nls_multstart(sl~gaussian_1987(temp = temp, rmax, topt, a),
 
 fit
 #Nonlinear regression model
-#model: sl ~ gaussian_1987(temp = temp, rmax, topt, a)
-#data: data
-#rmax   topt      a
-#0.503 21.081  4.297
-#residual sum-of-squares: 0.1193
-
-#Number of iterations to convergence: 22
-#Achieved convergence tolerance: 1.49e-08
+# model: sl ~ gaussian_1987(temp = temp, rmax, topt, a)
+# data: data
+# rmax    topt       a
+# 0.4922 21.0278  4.3256
+# residual sum-of-squares: 0.1282
+#
+# Number of iterations to convergence: 23
+# Achieved convergence tolerance: 1.49e-08
 
 # calculate additional traits
 calc_params(fit) %>%
   # round for easy viewing
   mutate_all(round, 2)
-#rmax  topt ctmin ctmax    e   eh  q10 thermal_safety_margin thermal_tolerance breadth skewness
-#1  0.5 21.08 10.56  31.6 0.67 2.21 2.51                 10.52             21.04    5.74    -1.54
+#rmax  topt ctmin ctmax    e  eh  q10 thermal_safety_margin thermal_tolerance breadth skewness
+#1 0.49 21.03 10.44 31.62 0.66 2.2 2.46                 10.59             21.18    5.78    -1.54
+
 
 # predict new data
-new_data <- data.frame(temp = seq(min(d_tpc1b_sumlm$temp), max(d_tpc1b_sumlm$temp), 0.5))
-preds_D <- augment(fit, newdata = new_data)
+new_data <- data.frame(temp = seq(min(d_tpc1b10_sumlm$temp), max(d_tpc1b10_sumlm$temp), 0.5))
+preds_D10 <- augment(fit, newdata = new_data)
 
 # plot data and model fit
-ggplot(d_tpc1b_sumlm, aes(temp, sl)) +
+ggplot(d_tpc1b10_sumlm, aes(temp, sl)) +
   geom_point() +
-  geom_line(aes(temp, .fitted), preds_D, col = 'blue') +
+  geom_line(aes(temp, .fitted), preds_D10, col = 'blue') +
   theme_bw(base_size = 12) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate',
-       title = 'ProD lm cutoff13')
+       title = 'ProD lm cutoff10')
 
 
 
@@ -2912,20 +2915,34 @@ d_preds <- mutate(d_fits, new_data = map(data, ~tibble(temp = seq(min(.x$temp), 
 glimpse(d_preds)
 
 # plot
-preds_BD <- mutate(preds_B, strain="ProB") %>%
-  bind_rows(mutate(preds_D, strain="ProD"))
+preds_BD <- mutate(preds_B, strain="ProB", topt=23.27333, toptsd=0.06429101) %>%
+  bind_rows(mutate(preds_D, strain="ProD", topt=21.08, toptsd=0.01))
+
+topts_BD <- tibble(strain=c("ProB","ProD"),
+                   topt=c(23.27,21.08),
+                   toptsd=c(0.06429101,0.01)
+)
 
 ggplot(d_preds) +
+  geom_rect(data=topts_BD, aes(xmin=(topt-10*toptsd), xmax=(topt+10*toptsd), ymin=-Inf, ymax=Inf), color=NA, fill = "grey")+
   geom_point(aes(temp, sl, col=rep), d) +
-  geom_line(aes(temp, .fitted, group=rep, col=rep)) +
-  geom_line(aes(temp, .fitted), preds_BD, col = 'black') +
-  facet_wrap(~strain, scales = 'free_y', ncol = 2) +
+  geom_line(aes(temp, .fitted, group=rep, col=rep), size=1, alpha=0.7) +
+  geom_line(aes(temp, .fitted), preds_BD, col = 'black', size=1) +
+  geom_vline(data = topts_BD, aes(xintercept=topt)) +
+  facet_wrap(~strain, ncol = 1) +
   theme_bw() +
+  theme(
+       #plot.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank())+
   theme(legend.position = 'none') +
-  scale_color_brewer(type = 'qual', palette = 2) +
+  scale_color_manual(values=met.brewer("Peru2", 3)) +
   labs(x = 'Temperature (ºC)',
-       y = 'Metabolic rate',
-       title = 'All fitted thermal performance curves')
+       y = 'Growth rate')
+
+#thicker
+#alpha
+#topt - geomtextpath
 
 
 
