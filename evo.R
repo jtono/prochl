@@ -88,23 +88,23 @@ for (i in unique(d_evo_nona$Rep)){
 
 #####plotting#####
 #plot b without removing nas
-ggplot(b_evo, aes(x=day, y=gr, col=as.factor(Treatment))) + 
+ggplot(b_evo, aes(x=day, y=gr, col=as.factor(Treatment))) +
   geom_line(aes(group=Rep))+
   geom_point()
 
 #plot b with removing nas
-ggplot(b_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) + 
+ggplot(b_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) +
   geom_line(aes(group=Rep))+
   geom_point()
-#mostly ok but huge dip at one timepoint - day 125 = 2022-03-31 
+#mostly ok but huge dip at one timepoint - day 125 = 2022-03-31
 
 #plot d without removing nas
-ggplot(d_evo, aes(x=day, y=gr, col=as.factor(Treatment))) + 
+ggplot(d_evo, aes(x=day, y=gr, col=as.factor(Treatment))) +
   geom_line(aes(group=Rep))+
   geom_point()
 
 #plot d with removing nas
-ggplot(d_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) + 
+ggplot(d_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) +
   geom_line(aes(group=Rep))+
   geom_point()
 #they have a big dip as well - day 118 = 2022-03-31 - same date
@@ -128,7 +128,7 @@ x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
 
-#find values 
+#find values
 summary(fit1)$adj.r.squared
 fit1$coefficients
 summary(fit1.rm)$adj.r.squared
@@ -150,7 +150,7 @@ x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
 
-#find values 
+#find values
 summary(fit1)$adj.r.squared
 fit1$coefficients
 summary(fit1.rm)$adj.r.squared
@@ -173,7 +173,7 @@ x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
 
-#find values 
+#find values
 summary(fit1)$adj.r.squared
 fit1$coefficients
 summary(fit1.rm)$adj.r.squared
@@ -195,15 +195,40 @@ x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
 
-#find values 
+#find values
 summary(fit1)$adj.r.squared
 fit1$coefficients
 summary(fit1.rm)$adj.r.squared
 fit1.rm$coefficients
 
 
+#######compare beginning and end######
+
+mean(d_subt27.rm[d_subt27.rm$day%in%unique(d_subt27.rm$day)[2:6],]$gr)
+#0.2445429
+mean(d_subt27.rm[d_subt27.rm$day%in%unique(d_subt27.rm$day)[15:19],]$gr)
+#0.5135323
+
+d_subt27_beg <- d_subt27[d_subt27$day%in%unique(d_subt27$day)[2:6],]
+d_subt27_end <- d_subt27[d_subt27$day%in%unique(d_subt27$day)[(length(unique(d_subt27$day))-4):length(unique(d_subt27$day))],]
+t.test(d_subt27_beg$gr, d_subt27_end$gr)
+# Welch Two Sample t-test
+#
+# data:  d_subt27.rm_beg$gr and d_subt27.rm_end$gr
+# t = -7.2127, df = 40.038, p-value = 9.448e-09
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   -0.3443608 -0.1936180
+# sample estimates:
+#   mean of x mean of y
+# 0.2445429 0.5135323
 
 
+d_subt23_beg <- d_subt23[d_subt23$day%in%unique(d_subt23$day)[2:6],]
+d_subt23_end <- d_subt23[d_subt23$day%in%unique(d_subt23$day)[(length(unique(d_subt23$day))-4):length(unique(d_subt23$day))],]
+t.test(d_subt23_beg$gr, d_subt23_end$gr)
+#different in wrong direction.
+#maybe do by sample?
 
 
 

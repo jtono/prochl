@@ -59,14 +59,22 @@ d_recip$rep <- paste(d_recip$Rep.ID,d_recip$Evo.Temp)
 ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
   geom_line(aes(group=rep))+
-  geom_vline(xintercept=10.5)+
-  facet_wrap(~Assay.Temp)
+  geom_vline(xintercept=10.5, linetype="dotted")+
+  facet_wrap(~Assay.Temp)+
+  labs(x = "Day",
+       y = "log(Actual Cell Count)",
+       title="ProB")
+
+
 
 ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
   geom_line(aes(group=rep))+
-  geom_vline(xintercept=10.5)+
-  facet_wrap(~Assay.Temp)
+  geom_vline(xintercept=10.5, linetype="dotted")+
+  facet_wrap(~Assay.Temp)+
+  labs(x = "Day",
+       y = "log(Actual Cell Count)",
+       title="ProD")
 
 #####fit lines####
 #basic regression line - by replicate
