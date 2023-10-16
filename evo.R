@@ -1,6 +1,7 @@
 library(ggplot2)
 library(nlme)
 library(lmerTest)
+library(visreg)
 
 
 #####getting data ready#####
@@ -210,17 +211,20 @@ fit1.rm$coefficients
 
 #####mixed effects models#####
 #b - b_evo_nona
-#make Treatment a factor
+#make Treatment, Rep into factors
 b_evo_nona$Treatment <- as.factor(b_evo_nona$Treatment)
-
+b_evo_nona$Rep <- as.factor(b_evo_nona$Rep)
 #make version where remove weird points
 b_evo_rm <- b_evo_nona[-which(b_evo_nona$day%in%c(125,131,138)),]
-
 
 #fit a mixed effects model
 b_nlme <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_nona, na.action=na.exclude)
 b_lme4 <- lmer(gr ~ day*Treatment + (day|Rep), data = b_evo_nona, na.action=na.exclude)
 
+b_nlme_rm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude)
+b_lme4_rm <- lmer(gr ~ day*Treatment + (day|Rep), data = b_evo_rm, na.action=na.exclude)
+
+#look at models..
 summary(b_nlme)
 summary(b_lme4)
 VarCorr(b_nlme)
@@ -230,89 +234,23 @@ intervals(b_nlme, which="fixed")
 anova(b_nlme)
 anova(b_lme4, type=1)
 
+fixef(b_lme4)
+ranef(b_lme4)
+library(MetBrewer)
+#plot - could also use , type="contrast"
+visreg(b_lme4, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(b_nlme, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(b_lme4_rm, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(b_nlme_rm, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+  theme_bw() +
+  scale_color_manual(values=c("blue","red")) +
+  scale_fill_manual(values=c("blue","red")) +
+  labs(title="ProB")
+
+
 #######left off here - visualize and do d and omit those others and get estimates for each?###########
 
 
-fit1.rm <- lm(gr~day, data=b_subt23.rm)
-#look at the fits
-plot(b_subt23$day, b_subt23$gr, pch=19, col="red")
-points(b_subt23.rm$day, b_subt23.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
-
-#subset by Treatment - 29
-b_subt29 <- subset(b_evo_nona, Treatment==29)
-#make version where remove weird points
-b_subt29.rm <- b_subt29[-which(b_subt29$day==125),]
-b_subt29.rm <- b_subt29.rm[-which(b_subt29.rm$day==131),]
-b_subt29.rm <- b_subt29.rm[-which(b_subt29.rm$day==138),]
-#fit a linear model
-fit1 <- lm(gr~day, data=b_subt29)
-fit1.rm <- lm(gr~day, data=b_subt29.rm)
-#look at the fits
-plot(b_subt29$day, b_subt29$gr, pch=19, col="red")
-points(b_subt29.rm$day, b_subt29.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
-
-#d - d_evo_nona
-#subset by Treatment - 23
-d_subt23 <- subset(d_evo_nona, Treatment==23)
-#make version where remove weird points
-d_subt23.rm <- d_subt23[-which(d_subt23$day==118),]
-d_subt23.rm <- d_subt23.rm[-which(d_subt23.rm$day==124),]
-d_subt23.rm <- d_subt23.rm[-which(d_subt23.rm$day==131),]
-#fit a linear model
-fit1 <- lm(gr~day, data=d_subt23)
-fit1.rm <- lm(gr~day, data=d_subt23.rm)
-#look at the fits
-plot(d_subt23$day, d_subt23$gr, pch=19, col="red")
-points(d_subt23.rm$day, d_subt23.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
-
-#subset by Treatment - 27
-d_subt27 <- subset(d_evo_nona, Treatment==27)
-#make version where remove weird points
-d_subt27.rm <- d_subt27[-which(d_subt27$day==118),]
-d_subt27.rm <- d_subt27.rm[-which(d_subt27.rm$day==124),]
-d_subt27.rm <- d_subt27.rm[-which(d_subt27.rm$day==131),]
-#fit a linear model
-fit1 <- lm(gr~day, data=d_subt27)
-fit1.rm <- lm(gr~day, data=d_subt27.rm)
-#look at the fits
-plot(d_subt27$day, d_subt27$gr, pch=19, col="red")
-points(d_subt27.rm$day, d_subt27.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
 
 #######compare beginning and end######
 
