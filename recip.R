@@ -203,6 +203,10 @@ p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 
 
 ###########stats###############
+b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
+b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
+d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
+d_gr10$Treatment <- paste(d_gr10$Evo.Temp, "@",d_gr10$Assay.Temp)
 
 aov.model1 <- aov(sl~Assay.Temp*Evo.Temp, data=b_gr)
 summary(aov.model1)
@@ -242,10 +246,7 @@ write.csv(d_treat_tk10$Treatment, "d_treat_tk10.csv")
 
 
 ######plot grs - boxplots with tukey letters#####
-b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
-b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
-d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
-d_gr10$Treatment <- paste(d_gr10$Evo.Temp, "@",d_gr10$Assay.Temp)
+
 #b
 
 p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
@@ -296,7 +297,7 @@ colnames(placement)[2] <- "Placement.Value"
 letters.df <- left_join(letters.df, placement) #Merge dataframes
 
 p <- ggplot(d_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot(alpha=0)+
+  geom_boxplot()+
   labs(x = 'Treatment',
        y = 'Growth rate',
        title = 'ProD')+

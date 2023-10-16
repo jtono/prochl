@@ -2924,11 +2924,11 @@ topts_BD <- tibble(strain=c("ProB","ProD"),
 )
 
 ggplot(d_preds) +
-  geom_rect(data=topts_BD, aes(xmin=(topt-10*toptsd), xmax=(topt+10*toptsd), ymin=-Inf, ymax=Inf), color=NA, fill = "grey")+
+  #geom_rect(data=topts_BD, aes(xmin=(topt-10*toptsd), xmax=(topt+10*toptsd), ymin=-Inf, ymax=Inf), color=NA, fill = "grey")+
   geom_point(aes(temp, sl, col=rep), d) +
   geom_line(aes(temp, .fitted, group=rep, col=rep), size=1, alpha=0.7) +
   geom_line(aes(temp, .fitted), preds_BD, col = 'black', size=1) +
-  geom_vline(data = topts_BD, aes(xintercept=topt)) +
+  geom_vline(data = topts_BD, aes(xintercept=topt), linetype="dashed") +
   facet_wrap(~strain, ncol = 1) +
   theme_bw() +
   theme(
@@ -2939,11 +2939,6 @@ ggplot(d_preds) +
   scale_color_manual(values=met.brewer("Peru2", 3)) +
   labs(x = 'Temperature (ºC)',
        y = 'Growth rate')
-
-#thicker
-#alpha
-#topt - geomtextpath
-
 
 
 

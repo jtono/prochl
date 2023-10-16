@@ -122,7 +122,7 @@ b_subt23.rm <- b_subt23[-which(b_subt23$day==125),]
 b_subt23.rm <- b_subt23.rm[-which(b_subt23.rm$day==131),]
 b_subt23.rm <- b_subt23.rm[-which(b_subt23.rm$day==138),]
 #fit a linear model
-fit1 <- lme(gr~day, data=b_subt23)
+fit1 <- lm(gr~day, data=b_subt23)
 fit1.rm <- lm(gr~day, data=b_subt23.rm)
 #look at the fits
 plot(b_subt23$day, b_subt23$gr, pch=19, col="red")
@@ -130,6 +130,7 @@ points(b_subt23.rm$day, b_subt23.rm$gr, pch=19, col="black")
 x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProB at 23")
 
 #find values
 summary(fit1)$adj.r.squared
@@ -152,6 +153,7 @@ points(b_subt29.rm$day, b_subt29.rm$gr, pch=19, col="black")
 x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProB at 29")
 
 #find values
 summary(fit1)$adj.r.squared
@@ -175,6 +177,7 @@ points(d_subt23.rm$day, d_subt23.rm$gr, pch=19, col="black")
 x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProD at 23")
 
 #find values
 summary(fit1)$adj.r.squared
@@ -197,6 +200,7 @@ points(d_subt27.rm$day, d_subt27.rm$gr, pch=19, col="black")
 x_axis <- seq(0,175,length=100)
 lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
 lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProD at 27")
 
 #find values
 summary(fit1)$adj.r.squared
@@ -213,7 +217,7 @@ b_evo_nona$Treatment <- as.factor(b_evo_nona$Treatment)
 b_evo_rm <- b_evo_nona[-which(b_evo_nona$day%in%c(125,131,138)),]
 
 
-#fit a linear model
+#fit a mixed effects model
 b_nlme <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_nona, na.action=na.exclude)
 b_lme4 <- lmer(gr ~ day*Treatment + (day|Rep), data = b_evo_nona, na.action=na.exclude)
 
@@ -225,6 +229,8 @@ confint(b_lme4, parm=c("day","Treatment29"))   # lmer
 intervals(b_nlme, which="fixed")
 anova(b_nlme)
 anova(b_lme4, type=1)
+
+#######left off here - visualize and do d and omit those others and get estimates for each?###########
 
 
 fit1.rm <- lm(gr~day, data=b_subt23.rm)
