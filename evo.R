@@ -248,6 +248,25 @@ visreg(b_nlme_rm, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab=
   labs(title="ProB")
 
 
+
+
+
+b_nlme_rm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude)
+b_nlme_rm_AR1 <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corGaus())
+
+plot(b_nlme_rm, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(b_nlme_rm, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(ACF(b_nlme_rm, resType = "normalized"))
+plot(ACF(b_nlme_rm_AR1, resType = "normalized"))
+plot(ACF(b_nlme_rm_AR1))
+
+AIC(b_nlme_rm, b_nlme_rm_AR1)
+anova(b_nlme_rm, b_nlme_rm_AR1)
+
+summary(b_nlme_rm_AR1)
+
+plot(ACF(fm2Ovar.lme,resType="normalized"),alpha=0.05)
+
 #######left off here - visualize and do d and omit those others and get estimates for each?###########
 
 
