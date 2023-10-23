@@ -280,9 +280,46 @@ b_rm0_CompSymmb <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, 
 b_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
 
 #corSymm has convergence problems in all tried
-#no random effects and ARMA correlation
-b_rm0_CAR1 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm())
-b_rm0_CAR1c <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+#this one wouldn't finish running
+#b_rm0_Symm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm())
+
+
+aic_comp <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+which(aic_comp$AIC == min(aic_comp$AIC))
+aic_comp[14,]
+#          df       AIC
+#b_rm0_ARMA  7 -643.1024
+
+anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+
+which(anov_comp$logLik==max(anov_comp$logLik))
+anov_comp[14,]
+#Model df       AIC       BIC   logLik     Test  L.Ratio p-value
+#b_rm0_ARMA    14  7 -643.1024 -619.2522 328.5512 13 vs 14 136.3066  <.0001
+
+anova(b_rm,b_rmI,b_rm0)
+#all same
+anova(b_rm,b_rm_AR1,b_rm_ARMA,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c)
+#b_rm_ARMA best
+anova(b_rmI,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc)
+#b_rmI_ARMA best
+anova(b_rm0,b_rm0_AR1,b_rm0_AR1c,b_rm0_ARMA,b_rm0_ARMAc,b_rm0_CAR1,b_rm0_CAR1c,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+#b_rm0_ARMA best
+anova(b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c)
+#b_rm0_AR1 best
+anova(b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc)
+#b_rm0_ARMA best
+anova(b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c)
+#b_rm0_CAR1 best
+anova(b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+#many same/similar, including b_rm0_CompSymmc
+
+#b_rm0_ARMA best. but if want random effects, look at one of the models with that.
+
+
+
+
+
 
 
 
