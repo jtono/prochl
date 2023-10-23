@@ -218,11 +218,130 @@ b_evo_nona$Rep <- as.factor(b_evo_nona$Rep)
 b_evo_rm <- b_evo_nona[-which(b_evo_nona$day%in%c(125,131,138)),]
 
 #fit a mixed effects model
-b_nlme <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_nona, na.action=na.exclude)
-b_lme4 <- lmer(gr ~ day*Treatment + (day|Rep), data = b_evo_nona, na.action=na.exclude)
+#full model with random effects (slope and intercept) and no temporal correlation fixing
+b_rm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude)
+#full model with random effects (intercept only) and no temporal correlation fixing
+b_rmI <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude)
+#no random effects
+b_rm0 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude)
 
-b_nlme_rm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude)
-b_lme4_rm <- lmer(gr ~ day*Treatment + (day|Rep), data = b_evo_rm, na.action=na.exclude)
+
+#full model with random effects (slope and intercept) and AR1 correlation
+#if add form with day, singular convergence
+b_rm_AR1 <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corAR1())
+
+#full model with random effects (intercept) and AR1 correlation
+b_rmI_AR1 <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corAR1())
+b_rmI_AR1b <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day))
+b_rmI_AR1c <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day|Rep))
+
+#no random effects and AR1 correlation
+b_rm0_AR1 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corAR1())
+b_rm0_AR1c <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day|Rep))
+
+#full model with random effects (slope and intercept) and ARMA correlation
+#if add form with day, singular convergence
+b_rm_ARMA <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+
+#full model with random effects (intercept) and ARMA correlation
+b_rmI_ARMA <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+b_rmI_ARMAb <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(form=~day,p=1,q=1))
+b_rmI_ARMAc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(form=~day|Rep,p=1,q=1))
+
+#no random effects and ARMA correlation
+b_rm0_ARMA <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+b_rm0_ARMAc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1, form=~day|Rep))
+
+#full model with random effects (slope and intercept) and CAR1 correlation
+b_rm_CAR1 <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1())
+b_rm_CAR1b <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day))
+b_rm_CAR1c <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+#full model with random effects (intercept) and CAR1 correlation
+b_rmI_CAR1 <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1())
+b_rmI_CAR1b <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day))
+b_rmI_CAR1c <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+#no random effects and CAR1 correlation
+b_rm0_CAR1 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1())
+b_rm0_CAR1c <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+#full model with random effects (slope and intercept) and CompSymm correlation
+#won't converge
+
+#full model with random effects (intercept) and CompSymm correlation
+b_rmI_CompSymm <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm())
+b_rmI_CompSymmb <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day))
+b_rmI_CompSymmc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
+
+#no random effects and CompSymm correlation
+b_rm0_CompSymm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm())
+b_rm0_CompSymmb <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day))
+b_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
+
+#corSymm has convergence problems in all tried
+#no random effects and ARMA correlation
+b_rm0_CAR1 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm())
+b_rm0_CAR1c <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+
+
+plot(b_nlme_rm)
+ACF(b_nlme_rm)
+
+
+
+
+
+
+
+
+
+
+
+
+#b_nlme_rm_CompSymm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(value=0.5))
+#no convergence
+b_nlme_rm_CompSym <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm())
+b_nlme_rm_CompSymb <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
+b_nlme_rm_ARMAg <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+#not working
+#b_nlme_rm_Symm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm(form=~day|Rep))
+
+
+plot(b_nlme_rm_CompSym)
+ACF(b_nlme_rm_CompSym)
+
+plot(b_nlme_rm_CompSym, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(b_nlme_rm, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(ACF(b_nlme_rm, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_AR1, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_CAR1, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_Exp, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_Gaus, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_Lin, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_Ratio, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_Spher, resType = "normalized"), alpha=0.05)
+plot(ACF(b_nlme_rm_CompSym, resType = "normalized"), alpha=0.05)
+
+plot(ACF(b_nlme_rm_AR1))
+
+AIC(b_nlme_rm, b_nlme_rm_AR1,b_nlme_rm_ARMA, b_nlme_rm_CAR1, b_nlme_rm_CAR1b,b_nlme_rm_Exp,b_nlme_rm_Gaus,b_nlme_rm_Lin,b_nlme_rm_Ratio,b_nlme_rm_Spher,b_nlme_rm_CompSym,b_nlme_rm_CompSymb)
+anova(b_nlme_rm, b_nlme_rm_AR1, b_nlme_rm_ARMA,b_nlme_rm_ARMAg,b_nlme_rm_CAR1, b_nlme_rm_Exp,b_nlme_rm_Gaus,b_nlme_rm_Lin,b_nlme_rm_Ratio,b_nlme_rm_Spher,b_nlme_rm_CompSym,b_nlme_rm_CompSymb)
+anova(b_nlme_rm, b_nlme_rm_Gaus)
+
+anova(b_nlme_rm_Spher, b_nlme_rm_AR1)
+
+
+
+
+summary(b_nlme_rm_AR1)
+
+plot(ACF(fm2Ovar.lme,resType="normalized"),alpha=0.05)
+
+
+
+
 
 #look at models..
 summary(b_nlme)
@@ -251,21 +370,6 @@ visreg(b_nlme_rm, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab=
 
 
 
-b_nlme_rm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude)
-b_nlme_rm_AR1 <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corGaus())
-
-plot(b_nlme_rm, resid(., type = "normalized") ~ day | Rep, abline = 0)
-plot(b_nlme_rm, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(ACF(b_nlme_rm, resType = "normalized"))
-plot(ACF(b_nlme_rm_AR1, resType = "normalized"))
-plot(ACF(b_nlme_rm_AR1))
-
-AIC(b_nlme_rm, b_nlme_rm_AR1)
-anova(b_nlme_rm, b_nlme_rm_AR1)
-
-summary(b_nlme_rm_AR1)
-
-plot(ACF(fm2Ovar.lme,resType="normalized"),alpha=0.05)
 
 #######left off here - visualize and do d and omit those others and get estimates for each?###########
 
