@@ -2,7 +2,7 @@ library(ggplot2)
 library(nlme)
 library(lmerTest)
 library(visreg)
-
+library(MetBrewer)
 
 #####getting data ready#####
 #read in data
@@ -284,18 +284,25 @@ b_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, 
 #b_rm0_Symm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm())
 
 
-aic_comp <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+aic_comp <- AICc(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
 which(aic_comp$AIC == min(aic_comp$AIC))
+which(aic_comp$AIC < -600)
+aic_comp[c(8,14,22),]
 aic_comp[14,]
 #          df       AIC
 #b_rm0_ARMA  7 -643.1024
 
-anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
 
 which(anov_comp$logLik==max(anov_comp$logLik))
 anov_comp[14,]
 #Model df       AIC       BIC   logLik     Test  L.Ratio p-value
 #b_rm0_ARMA    14  7 -643.1024 -619.2522 328.5512 13 vs 14 136.3066  <.0001
+which(anov_comp$logLik>300)
+anov_comp[c(8,14,22),]
+anova(b_rm0_AR1, b_rm0_ARMA, b_rm0_CAR1)
+library(lmtest)
+lrtest(b_rm0_AR1, b_rm0_ARMA, b_rm0_CAR1)
 
 anova(b_rm,b_rmI,b_rm0)
 #all same
@@ -316,86 +323,35 @@ anova(b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSy
 
 #b_rm0_ARMA best. but if want random effects, look at one of the models with that.
 
+#checking plots
+plot(b_rm0_ARMA)
+
+plot(b_rm0, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(b_rm0_ARMA, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(b_rm0, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(b_rm0_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+#these don't work for rm0
+plot(ACF(b_rm0, resType = "normalized"), alpha=0.05)
+plot(ACF(b_rm0_ARMA, resType = "normalized"), alpha=0.05)
+
+#look at best models
+summary(b_rm0_ARMA)
+#VarCorr(b_rm0_ARMA)
+confint(b_rm0_ARMA, parm=c("day","Treatment29"))   # lmer
+intervals(b_rm0_ARMA, which="all")
+anova(b_rm0_ARMA)
+#fixef(b_rm0_ARMA)
+#ranef(b_lme4)
+
+
+####report stuff from summary but mostly CI?######
 
 
 
 
-
-
-
-plot(b_nlme_rm)
-ACF(b_nlme_rm)
-
-
-
-
-
-
-
-
-
-
-
-
-#b_nlme_rm_CompSymm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(value=0.5))
-#no convergence
-b_nlme_rm_CompSym <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm())
-b_nlme_rm_CompSymb <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
-b_nlme_rm_ARMAg <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
-#not working
-#b_nlme_rm_Symm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm(form=~day|Rep))
-
-
-plot(b_nlme_rm_CompSym)
-ACF(b_nlme_rm_CompSym)
-
-plot(b_nlme_rm_CompSym, resid(., type = "normalized") ~ day | Rep, abline = 0)
-plot(b_nlme_rm, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(ACF(b_nlme_rm, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_AR1, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_CAR1, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_Exp, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_Gaus, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_Lin, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_Ratio, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_Spher, resType = "normalized"), alpha=0.05)
-plot(ACF(b_nlme_rm_CompSym, resType = "normalized"), alpha=0.05)
-
-plot(ACF(b_nlme_rm_AR1))
-
-AIC(b_nlme_rm, b_nlme_rm_AR1,b_nlme_rm_ARMA, b_nlme_rm_CAR1, b_nlme_rm_CAR1b,b_nlme_rm_Exp,b_nlme_rm_Gaus,b_nlme_rm_Lin,b_nlme_rm_Ratio,b_nlme_rm_Spher,b_nlme_rm_CompSym,b_nlme_rm_CompSymb)
-anova(b_nlme_rm, b_nlme_rm_AR1, b_nlme_rm_ARMA,b_nlme_rm_ARMAg,b_nlme_rm_CAR1, b_nlme_rm_Exp,b_nlme_rm_Gaus,b_nlme_rm_Lin,b_nlme_rm_Ratio,b_nlme_rm_Spher,b_nlme_rm_CompSym,b_nlme_rm_CompSymb)
-anova(b_nlme_rm, b_nlme_rm_Gaus)
-
-anova(b_nlme_rm_Spher, b_nlme_rm_AR1)
-
-
-
-
-summary(b_nlme_rm_AR1)
-
-plot(ACF(fm2Ovar.lme,resType="normalized"),alpha=0.05)
-
-
-
-
-
-#look at models..
-summary(b_nlme)
-summary(b_lme4)
-VarCorr(b_nlme)
-VarCorr(b_lme4)
-confint(b_lme4, parm=c("day","Treatment29"))   # lmer
-intervals(b_nlme, which="fixed")
-anova(b_nlme)
-anova(b_lme4, type=1)
-
-fixef(b_lme4)
-ranef(b_lme4)
-library(MetBrewer)
 #plot - could also use , type="contrast"
-visreg(b_lme4, "day", by="Treatment", gg=TRUE, overlay=TRUE)
-visreg(b_nlme, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(b_rm0_ARMA, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(b_rm0, "day", by="Treatment", gg=TRUE, overlay=TRUE)
 visreg(b_lme4_rm, "day", by="Treatment", gg=TRUE, overlay=TRUE)
 visreg(b_nlme_rm, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
