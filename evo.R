@@ -3,7 +3,7 @@ library(nlme)
 library(lmerTest)
 library(visreg)
 library(MetBrewer)
-
+library("flextable")
 #####getting data ready#####
 #read in data
 b_evo <- read.csv("Pc_B_Evo.csv", sep=",", as.is=TRUE, header=TRUE)
@@ -209,7 +209,7 @@ fit1$coefficients
 summary(fit1.rm)$adj.r.squared
 fit1.rm$coefficients
 
-#####mixed effects models#####
+#####mixed effects models - b #####
 #b - b_evo_nona
 #make Treatment, Rep into factors
 b_evo_nona$Treatment <- as.factor(b_evo_nona$Treatment)
@@ -237,6 +237,7 @@ b_rmI_AR1c <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.action
 
 #no random effects and AR1 correlation
 b_rm0_AR1 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corAR1())
+b_rm0_AR1a <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corAR1(form=~1|Rep))
 b_rm0_AR1c <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day|Rep))
 
 #full model with random effects (slope and intercept) and ARMA correlation
@@ -250,6 +251,7 @@ b_rmI_ARMAc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.actio
 
 #no random effects and ARMA correlation
 b_rm0_ARMA <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+b_rm0_ARMAa <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~1|Rep))
 b_rm0_ARMAc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1, form=~day|Rep))
 
 #full model with random effects (slope and intercept) and CAR1 correlation
@@ -264,6 +266,7 @@ b_rmI_CAR1c <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.actio
 
 #no random effects and CAR1 correlation
 b_rm0_CAR1 <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1())
+b_rm0_CAR1a <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~1|Rep))
 b_rm0_CAR1c <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
 
 #full model with random effects (slope and intercept) and CompSymm correlation
@@ -276,6 +279,7 @@ b_rmI_CompSymmc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.a
 
 #no random effects and CompSymm correlation
 b_rm0_CompSymm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm())
+b_rm0_CompSymma <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~1|Rep))
 b_rm0_CompSymmb <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day))
 b_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
 
@@ -284,7 +288,160 @@ b_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, 
 #b_rm0_Symm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm())
 
 
-aic_comp <- AICc(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+aic_comp <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc)
+
+which(aic_comp$AIC == min(aic_comp$AIC))
+which(aic_comp$AIC < -600)
+aic_comp[c(8,15,24),]
+aic_comp[15,]
+#         df       AIC
+#b_rm0_ARMA  7 -643.10244
+
+anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
+
+#save anova table output
+save_as_docx(flextable(anov_comp),path="tables/tableSup1.docx")
+
+which(anov_comp$logLik==max(anov_comp$logLik))
+anov_comp[15,]
+# Model df       AIC       BIC   logLik     Test  L.Ratio p-value
+#b_rm0_ARMA    15  7 -643.1024 -619.2522 328.5512 14 vs 15 136.3066  <.0001
+which(anov_comp$logLik>300)
+anov_comp[c(8,15,24),]
+anova(b_rm0_AR1, b_rm0_ARMA, b_rm0_CAR1)
+
+#######left off here in redo. add in all new "a" models, make sure all "a" models in d#########
+anova(b_rm,b_rmI,b_rm0)
+#all same
+anova(b_rm,b_rm_AR1,b_rm_ARMA,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c)
+#b_rm_ARMA best
+anova(b_rmI,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc)
+#b_rmI_ARMA best
+anova(b_rm0,b_rm0_AR1,b_rm0_AR1c,b_rm0_ARMA,b_rm0_ARMAc,b_rm0_CAR1,b_rm0_CAR1c,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+#b_rm0_ARMA best
+anova(b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c)
+#b_rm0_AR1 best
+anova(b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc)
+#b_rm0_ARMA best
+anova(b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c)
+#b_rm0_CAR1 best
+anova(b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+#many same/similar, including b_rm0_CompSymmc
+
+#b_rm0_ARMA best. but if want random effects, look at one of the models with that.
+
+#checking plots
+plot(b_rm0_ARMA)
+
+plot(b_rm0, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(b_rm0_ARMA, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(b_rm0, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(b_rm0_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+#these don't work for rm0
+plot(ACF(b_rm0, resType = "normalized"), alpha=0.05)
+plot(ACF(b_rm0_ARMA, resType = "normalized"), alpha=0.05)
+
+#look at best models
+summary(b_rm0_ARMA)
+#VarCorr(b_rm0_ARMA)
+confint(b_rm0_ARMA, parm=c("day","Treatment29"))   # lmer
+intervals(b_rm0_ARMA, which="all", level=0.95)
+anova(b_rm0_ARMA)
+#fixef(b_rm0_ARMA)
+#ranef(b_lme4)
+
+#plot - could also use , type="contrast"
+visreg(b_rm0_ARMA, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+  theme_bw() +
+  scale_color_manual(values=c("blue","red")) +
+  scale_fill_manual(values=c("blue","red")) +
+  labs(title="ProB")
+
+#####mixed effects models - d#####
+#d - d_evo_nona
+#make Treatment, Rep into factors
+d_evo_nona$Treatment <- as.factor(d_evo_nona$Treatment)
+d_evo_nona$Rep <- as.factor(d_evo_nona$Rep)
+#make version where remove weird points
+d_evo_rm <- d_evo_nona[-which(d_evo_nona$day%in%c(125,131,138)),]
+
+#fit a mixed effects model
+#full model with random effects (slope and intercept) and no temporal correlation fixing
+d_rm <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude)
+#full model with random effects (intercept only) and no temporal correlation fixing
+d_rmI <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude)
+#no random effects
+d_rm0 <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude)
+
+
+#full model with random effects (slope and intercept) and AR1 correlation
+d_rm_AR1 <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corAR1())
+d_rm_AR1b <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day))
+d_rm_AR1c <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day|Rep))
+
+#full model with random effects (intercept) and AR1 correlation
+d_rmI_AR1 <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corAR1())
+d_rmI_AR1b <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day))
+d_rmI_AR1c <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day|Rep))
+
+#no random effects and AR1 correlation
+d_rm0_AR1 <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corAR1())
+d_rm0_AR1a <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corAR1(form=~1|Rep))
+d_rm0_AR1c <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corAR1(form=~day|Rep))
+
+#full model with random effects (slope and intercept) and ARMA correlation
+d_rm_ARMA <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+d_rm_ARMAb <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~day))
+d_rm_ARMAc <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~day|Rep))
+
+#full model with random effects (intercept) and ARMA correlation
+d_rmI_ARMA <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+d_rmI_ARMAb <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(form=~day,p=1,q=1))
+d_rmI_ARMAc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(form=~day|Rep,p=1,q=1))
+
+#no random effects and ARMA correlation
+d_rm0_ARMA <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+d_rm0_ARMAa <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~1|Rep))
+d_rm0_ARMAc <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1, form=~day|Rep))
+
+#full model with random effects (slope and intercept) and CAR1 correlation
+d_rm_CAR1 <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1())
+d_rm_CAR1b <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day))
+d_rm_CAR1c <- lme(gr ~ day*Treatment, random = ~ day|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+#full model with random effects (intercept) and CAR1 correlation
+d_rmI_CAR1 <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1())
+d_rmI_CAR1b <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day))
+d_rmI_CAR1c <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+#no random effects and CAR1 correlation
+d_rm0_CAR1 <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1())
+d_rm0_CAR1a <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~1|Rep))
+d_rm0_CAR1c <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCAR1(form=~day|Rep))
+
+#full model with random effects (slope and intercept) and CompSymm correlation
+#none worked
+
+#full model with random effects (intercept) and CompSymm correlation
+d_rmI_CompSymm <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm())
+d_rmI_CompSymmb <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day))
+d_rmI_CompSymmc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
+
+#no random effects and CompSymm correlation
+d_rm0_CompSymm <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm())
+d_rm0_CompSymma <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~1|Rep))
+d_rm0_CompSymmb <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day))
+d_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corCompSymm(form=~day|Rep))
+
+#corSymm has convergence problems in all tried
+#wouldn't finish running
+#d_rm0_Symm <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corSymm())
+
+
+
+
+aic_comp <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
 which(aic_comp$AIC == min(aic_comp$AIC))
 which(aic_comp$AIC < -600)
 aic_comp[c(8,14,22),]
@@ -293,6 +450,9 @@ aic_comp[14,]
 #b_rm0_ARMA  7 -643.1024
 
 anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
+
+#save anova table output
+save_as_docx(flextable(anov_comp),path="tables/tableSup1.docx")
 
 which(anov_comp$logLik==max(anov_comp$logLik))
 anov_comp[14,]
@@ -338,22 +498,14 @@ plot(ACF(b_rm0_ARMA, resType = "normalized"), alpha=0.05)
 summary(b_rm0_ARMA)
 #VarCorr(b_rm0_ARMA)
 confint(b_rm0_ARMA, parm=c("day","Treatment29"))   # lmer
-intervals(b_rm0_ARMA, which="all")
+intervals(b_rm0_ARMA, which="all", level=0.95)
 anova(b_rm0_ARMA)
 #fixef(b_rm0_ARMA)
 #ranef(b_lme4)
 
-
-####report stuff from summary but mostly CI?######
-
-
-
-
 #plot - could also use , type="contrast"
 visreg(b_rm0_ARMA, "day", by="Treatment", gg=TRUE, overlay=TRUE)
-visreg(b_rm0, "day", by="Treatment", gg=TRUE, overlay=TRUE)
-visreg(b_lme4_rm, "day", by="Treatment", gg=TRUE, overlay=TRUE)
-visreg(b_nlme_rm, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
   scale_color_manual(values=c("blue","red")) +
   scale_fill_manual(values=c("blue","red")) +
