@@ -288,44 +288,43 @@ b_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, 
 #b_rm0_Symm <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corSymm())
 
 
-aic_comp <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc)
+aic_comp_b <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc)
 
-which(aic_comp$AIC == min(aic_comp$AIC))
-which(aic_comp$AIC < -600)
-aic_comp[c(8,15,24),]
-aic_comp[15,]
+which(aic_comp_b$AIC == min(aic_comp_b$AIC))
+which(aic_comp_b$AIC < -600)
+aic_comp_b[c(8,15,24),]
+aic_comp_b[15,]
 #         df       AIC
 #b_rm0_ARMA  7 -643.10244
 
-anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
+anov_comp_b <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
 
 #save anova table output
-save_as_docx(flextable(anov_comp),path="tables/tableSup1.docx")
+save_as_docx(flextable(anov_comp_b),path="tables/tableSup1_b.docx")
 
-which(anov_comp$logLik==max(anov_comp$logLik))
-anov_comp[15,]
+which(anov_comp_b$logLik==max(anov_comp_b$logLik))
+anov_comp_b[15,]
 # Model df       AIC       BIC   logLik     Test  L.Ratio p-value
 #b_rm0_ARMA    15  7 -643.1024 -619.2522 328.5512 14 vs 15 136.3066  <.0001
-which(anov_comp$logLik>300)
-anov_comp[c(8,15,24),]
+which(anov_comp_b$logLik>300)
+anov_comp_b[c(8,15,24),]
 anova(b_rm0_AR1, b_rm0_ARMA, b_rm0_CAR1)
 
-#######left off here in redo. add in all new "a" models, make sure all "a" models in d#########
 anova(b_rm,b_rmI,b_rm0)
 #all same
 anova(b_rm,b_rm_AR1,b_rm_ARMA,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c)
 #b_rm_ARMA best
 anova(b_rmI,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc)
 #b_rmI_ARMA best
-anova(b_rm0,b_rm0_AR1,b_rm0_AR1c,b_rm0_ARMA,b_rm0_ARMAc,b_rm0_CAR1,b_rm0_CAR1c,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+anova(b_rm0,b_rm0_AR1,b_rm0_AR1a, b_rm0_AR1c,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc)
 #b_rm0_ARMA best
-anova(b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c)
+anova(b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c)
 #b_rm0_AR1 best
-anova(b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc)
+anova(b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc)
 #b_rm0_ARMA best
-anova(b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c)
+anova(b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c)
 #b_rm0_CAR1 best
-anova(b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
+anova(b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc)
 #many same/similar, including b_rm0_CompSymmc
 
 #b_rm0_ARMA best. but if want random effects, look at one of the models with that.
@@ -438,78 +437,81 @@ d_rm0_CompSymmc <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, 
 #wouldn't finish running
 #d_rm0_Symm <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corSymm())
 
+aic_comp_d <- AIC(d_rm,d_rmI,d_rm0,d_rm_AR1,d_rm_AR1b,d_rm_AR1c,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm_ARMA,d_rm_ARMAb,d_rm_ARMAc,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm_CAR1,d_rm_CAR1b,d_rm_CAR1c,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc)
+
+which(aic_comp_d$AIC == min(aic_comp_d$AIC))
+aic_comp_d[19,]
+#df       AIC
+#d_rm0_ARMA  7 -292.4176
+which(aic_comp_d$AIC < -280)
+aic_comp_d[c(10,19,28),]
+#           df       AIC
+#d_rm0_AR1   6 -288.6272
+#d_rm0_ARMA  7 -292.4176
+#d_rm0_CAR1  6 -288.6272
 
 
-
-aic_comp <- AIC(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
-which(aic_comp$AIC == min(aic_comp$AIC))
-which(aic_comp$AIC < -600)
-aic_comp[c(8,14,22),]
-aic_comp[14,]
-#          df       AIC
-#b_rm0_ARMA  7 -643.1024
-
-anov_comp <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
+anov_comp_d <- anova(d_rm,d_rmI,d_rm0,d_rm_AR1,d_rm_AR1b,d_rm_AR1c,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm_ARMA,d_rm_ARMAb,d_rm_ARMAc,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm_CAR1,d_rm_CAR1b,d_rm_CAR1c,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc,test=TRUE)
 
 #save anova table output
-save_as_docx(flextable(anov_comp),path="tables/tableSup1.docx")
+save_as_docx(flextable(anov_comp_d),path="tables/tableSup1_d.docx")
 
-which(anov_comp$logLik==max(anov_comp$logLik))
-anov_comp[14,]
-#Model df       AIC       BIC   logLik     Test  L.Ratio p-value
-#b_rm0_ARMA    14  7 -643.1024 -619.2522 328.5512 13 vs 14 136.3066  <.0001
-which(anov_comp$logLik>300)
-anov_comp[c(8,14,22),]
-anova(b_rm0_AR1, b_rm0_ARMA, b_rm0_CAR1)
-library(lmtest)
-lrtest(b_rm0_AR1, b_rm0_ARMA, b_rm0_CAR1)
+which(anov_comp_d$logLik==max(anov_comp_d$logLik))
+anov_comp_d[19,]
+# Model df       AIC       BIC   logLik     Test  L.Ratio p-value
+#d_rm0_ARMA    19  7 -292.4176 -267.9951 153.2088 18 vs 19 75.13156  <.0001
+which(anov_comp_d$logLik>145)
+anov_comp_d[c(10,19,28),]
+anova(d_rm0_AR1, d_rm0_ARMA, d_rm0_CAR1)
 
-anova(b_rm,b_rmI,b_rm0)
-#all same
-anova(b_rm,b_rm_AR1,b_rm_ARMA,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c)
-#b_rm_ARMA best
-anova(b_rmI,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc)
-#b_rmI_ARMA best
-anova(b_rm0,b_rm0_AR1,b_rm0_AR1c,b_rm0_ARMA,b_rm0_ARMAc,b_rm0_CAR1,b_rm0_CAR1c,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
-#b_rm0_ARMA best
-anova(b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1c)
-#b_rm0_AR1 best
-anova(b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAc)
-#b_rm0_ARMA best
-anova(b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1c)
-#b_rm0_CAR1 best
-anova(b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymmb,b_rm0_CompSymmc)
-#many same/similar, including b_rm0_CompSymmc
+anova(d_rm,d_rmI,d_rm0)
+#with only fixed effects sig worse (other two same)
+anova(d_rm,d_rm_AR1,d_rm_AR1b,d_rm_AR1c,d_rm_ARMA,d_rm_ARMAb,d_rm_ARMAc,d_rm_CAR1,d_rm_CAR1b,d_rm_CAR1c)
+#d_rm_CAR1b/c best
+anova(d_rmI,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc)
+#d_rmI_CAR1b/c best
+anova(d_rm0,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc)
+#d_rm0_ARMA best
+anova(d_rm_AR1,d_rm_AR1b,d_rm_AR1c,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c)
+#d_rm0_AR1  best
+anova(d_rm_ARMA,d_rm_ARMAb,d_rm_ARMAc,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc)
+#d_rm0_ARMA best
+anova(d_rm_CAR1,d_rm_CAR1b,d_rm_CAR1c,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c)
+#d_rm0_CAR1 best
+anova(d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc)
+#many same/similar, including d_rm0_CompSymmc
 
-#b_rm0_ARMA best. but if want random effects, look at one of the models with that.
+#d_rm0_ARMA best. but model without correction, including random effects better
 
 #checking plots
-plot(b_rm0_ARMA)
+plot(d_rm0_ARMA)
 
-plot(b_rm0, resid(., type = "normalized") ~ day | Rep, abline = 0)
-plot(b_rm0_ARMA, resid(., type = "normalized") ~ day | Rep, abline = 0)
-plot(b_rm0, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(b_rm0_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(d_rm0, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(d_rmI, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(d_rm0_ARMA, resid(., type = "normalized") ~ day | Rep, abline = 0)
+#R6 27 still crazy
+plot(d_rm0, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(d_rm0_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
 #these don't work for rm0
-plot(ACF(b_rm0, resType = "normalized"), alpha=0.05)
-plot(ACF(b_rm0_ARMA, resType = "normalized"), alpha=0.05)
+plot(ACF(d_rm0, resType = "normalized"), alpha=0.05)
+plot(ACF(d_rm0_ARMA, resType = "normalized"), alpha=0.05)
 
 #look at best models
-summary(b_rm0_ARMA)
+summary(d_rm0_ARMA)
 #VarCorr(b_rm0_ARMA)
-confint(b_rm0_ARMA, parm=c("day","Treatment29"))   # lmer
-intervals(b_rm0_ARMA, which="all", level=0.95)
-anova(b_rm0_ARMA)
+confint(d_rm0_ARMA, parm=c("day","Treatment27"))   # lmer
+intervals(d_rm0_ARMA, which="all", level=0.95)
+anova(d_rm0_ARMA)
 #fixef(b_rm0_ARMA)
 #ranef(b_lme4)
 
 #plot - could also use , type="contrast"
-visreg(b_rm0_ARMA, "day", by="Treatment", gg=TRUE, overlay=TRUE)
-visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+visreg(d_rm0_ARMA, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(d_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
   scale_color_manual(values=c("blue","red")) +
   scale_fill_manual(values=c("blue","red")) +
-  labs(title="ProB")
+  labs(title="ProD")
 
 
 
