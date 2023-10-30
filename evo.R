@@ -670,89 +670,93 @@ d_rm60_CompSymmc <- gls(gr ~ day*Treatment, data=d_evo_rm6, na.action=na.exclude
 #wouldn't finish running
 #d_rm60_Symm <- gls(gr ~ day*Treatment, data=d_evo_rm6, na.action=na.exclude, correlation=corSymm())
 
-######left off here######
 
-aic_comp_d <- AIC(d_rmI,d_rm0,d_rm_AR1,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm_ARMA,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm_CAR1,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc)
 
-which(aic_comp_d$AIC == min(aic_comp_d$AIC))
-aic_comp_d[15,]
+aic_comp_d6 <- AIC(d_rm6,d_rm6I,d_rm60,d_rm6_AR1,d_rm6_AR1b,d_rm6_AR1c,d_rm6I_AR1,d_rm6I_AR1b,d_rm6I_AR1c,d_rm60_AR1,d_rm60_AR1a,d_rm60_AR1c,d_rm6_ARMA,d_rm6_ARMAb,d_rm6_ARMAc,d_rm6I_ARMA,d_rm6I_ARMAb,d_rm6I_ARMAc,d_rm60_ARMA,d_rm60_ARMAa,d_rm60_ARMAc,d_rm6_CAR1,d_rm6_CAR1b,d_rm6_CAR1c,d_rm6I_CAR1,d_rm6I_CAR1b,d_rm6I_CAR1c,d_rm60_CAR1,d_rm60_CAR1a,d_rm60_CAR1c,d_rm6_CompSymm,d_rm6_CompSymmb,d_rm6_CompSymmc,d_rm6I_CompSymm,d_rm6I_CompSymmb,d_rm6I_CompSymmc,d_rm60_CompSymm,d_rm60_CompSymma,d_rm60_CompSymmb,d_rm60_CompSymmc)
+
+which(aic_comp_d6$AIC == min(aic_comp_d6$AIC))
+aic_comp_d6[28,]
 #            df       AIC
-#d_rm0_ARMAa  7 -286.4654
-which(aic_comp_d$AIC < -270)
-aic_comp_d[c(8,10,11,15,22),]
-#           df       AIC
-#d_rm_ARMA   10 -280.4654
-#d_rmI_ARMA   8 -284.4654
-#d_rm0_ARMAa  7 -286.4654
+#d_rm60_CAR1  6 -429.4704
+which(aic_comp_d6$AIC < -400)
+aic_comp_d6[c(10,19,28),]
+#            df       AIC
+#d_rm60_AR1   6 -429.4704
+#d_rm60_ARMA  7 -427.5531
+#d_rm60_CAR1  6 -429.4704
 
 
-anov_comp_d <- anova(d_rmI,d_rm0,d_rm_AR1,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm_ARMA,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm_CAR1,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc,test=TRUE)
+anov_comp_d6 <- anova(d_rm6,d_rm6I,d_rm60,d_rm6_AR1,d_rm6_AR1b,d_rm6_AR1c,d_rm6I_AR1,d_rm6I_AR1b,d_rm6I_AR1c,d_rm60_AR1,d_rm60_AR1a,d_rm60_AR1c,d_rm6_ARMA,d_rm6_ARMAb,d_rm6_ARMAc,d_rm6I_ARMA,d_rm6I_ARMAb,d_rm6I_ARMAc,d_rm60_ARMA,d_rm60_ARMAa,d_rm60_ARMAc,d_rm6_CAR1,d_rm6_CAR1b,d_rm6_CAR1c,d_rm6I_CAR1,d_rm6I_CAR1b,d_rm6I_CAR1c,d_rm60_CAR1,d_rm60_CAR1a,d_rm60_CAR1c,d_rm6_CompSymm,d_rm6_CompSymmb,d_rm6_CompSymmc,d_rm6I_CompSymm,d_rm6I_CompSymmb,d_rm6I_CompSymmc,d_rm60_CompSymm,d_rm60_CompSymma,d_rm60_CompSymmb,d_rm60_CompSymmc,test=TRUE)
 
 #save anova table output
-save_as_docx(flextable(anov_comp_d),path="tables/tableSup1_d.docx")
+save_as_docx(flextable(anov_comp_d6),path="tables/tableSup1_d6.docx")
 
-which(anov_comp_d$logLik==max(anov_comp_d$logLik))
-anov_comp_d[15,]
-#           Model df       AIC       BIC   logLik Test L.Ratio p-value
-#d_rm0_ARMAa    15  7 -286.4654 -262.7739 150.2327
-which(anov_comp_d$logLik>145)
-anov_comp_d[c(10,11,15),]
+which(anov_comp_d6$logLik==max(anov_comp_d6$logLik))
+anov_comp_d6[19,]
+#            Model df       AIC       BIC   logLik     Test  L.Ratio p-value
+#d_rm60_ARMA    19  7 -427.5531 -404.4649 220.7766 18 vs 19 160.1227  <.0001
+which(anov_comp_d6$logLik>200)
+anov_comp_d6[c(10,19,28),]
 #all the same
-anova(d_rm0_CAR1a,d_rm_ARMA, d_rmI_ARMA, d_rm0_ARMAa, d_rm0_AR1a)
+anova(d_rm60_AR1,d_rm60_ARMA, d_rm60_CAR1)
 
-anova(d_rmI,d_rm0)
-#with only fixed effects sig worse
-anova(d_rm_AR1,d_rm_ARMA,d_rm_CAR1)
-#d_rm_ARMA best
-anova(d_rmI,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc)
-#d_rmI_ARMA best
-anova(d_rm0,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc)
-#d_rm0_ARMAa best
-anova(d_rm_AR1,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c)
-#close between d_rm0_AR1a, d_rm_AR1, d_rmI_AR1
-anova(d_rm_ARMA,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc)
-#close between d_rm_ARMA, d_rmI_ARMA, d_rm0_ARMAa
-anova(d_rm_CAR1,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c)
-#close between most except d_rm0_CAR1
-anova(d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc)
-#many same/similar, including d_rm0_CompSymmc
+anova(d_rm6,d_rm6I,d_rm60)
+#all same
+anova(d_rm6,d_rm6_AR1,d_rm6_AR1b,d_rm6_AR1c,d_rm6_ARMA,d_rm6_ARMAb,d_rm6_ARMAc,d_rm6_CAR1,d_rm6_CAR1b,d_rm6_CAR1c,d_rm6_CompSymm,d_rm6_CompSymmb,d_rm6_CompSymmc)
+#a few similar, maybe d_rm6_CAR1b/c best
+anova(d_rm6I,d_rm6I_AR1,d_rm6I_AR1b,d_rm6I_AR1c,d_rm6I_ARMA,d_rm6I_ARMAb,d_rm6I_ARMAc,d_rm6I_CAR1,d_rm6I_CAR1b,d_rm6I_CAR1c,d_rm6I_CompSymm,d_rm6I_CompSymmb,d_rm6I_CompSymmc)
+#a few similar but d_rm6I_CAR1b/c best
+anova(d_rm60,d_rm60_AR1,d_rm60_AR1a,d_rm60_AR1c,d_rm60_ARMA,d_rm60_ARMAa,d_rm60_ARMAc,d_rm60_CAR1,d_rm60_CAR1a,d_rm60_CAR1c,d_rm60_CompSymm,d_rm60_CompSymma,d_rm60_CompSymmb,d_rm60_CompSymmc)
+#d_rm60_AR1, d_rm60_ARMA, d_rm60_CAR1 similar
+anova(d_rm6_AR1,d_rm6_AR1b,d_rm6_AR1c,d_rm6I_AR1,d_rm6I_AR1b,d_rm6I_AR1c,d_rm60_AR1,d_rm60_AR1a,d_rm60_AR1c)
+#d_rm60_AR1  best
+anova(d_rm6_ARMA,d_rm6_ARMAb,d_rm6_ARMAc,d_rm6I_ARMA,d_rm6I_ARMAb,d_rm6I_ARMAc,d_rm60_ARMA,d_rm60_ARMAa,d_rm60_ARMAc)
+#d_rm60_ARMA best
+anova(d_rm6_CAR1,d_rm6_CAR1b,d_rm6_CAR1c,d_rm6I_CAR1,d_rm6I_CAR1b,d_rm6I_CAR1c,d_rm60_CAR1,d_rm60_CAR1a,d_rm60_CAR1c)
+#d_rm60_CAR1 best
+anova(d_rm6_CompSymm,d_rm6_CompSymmb,d_rm6_CompSymmc,d_rm6I_CompSymm,d_rm6I_CompSymmb,d_rm6I_CompSymmc,d_rm60_CompSymm,d_rm60_CompSymma,d_rm60_CompSymmb,d_rm60_CompSymmc)
+#many similar/same
 
-#d_rm0_ARMAa has lowest AIC but d_rm_ARMA, d_rmI_ARMA as good.
+#d_rm60_AR1,d_rm60_ARMA, d_rm60_CAR1 all pretty equivalent
 
 #checking plots
-plot(d_rm0_ARMAa)
+plot(d_rm60_AR1)
+plot(d_rm60_ARMA)
+plot(d_rm60_CAR1)
 
-plot(d_rm0, resid(., type = "normalized") ~ day | Rep, abline = 0)
-plot(d_rmI, resid(., type = "normalized") ~ day | Rep, abline = 0)
-plot(d_rm0_ARMAa, resid(., type = "normalized") ~ day | Rep, abline = 0)
-#R6 27 still crazy
-plot(d_rm0, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(d_rm0_ARMAa, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(d_rm_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(d_rmI, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
-plot(d_rmI_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(d_rm60, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(d_rm60_AR1, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(d_rm60_ARMA, resid(., type = "normalized") ~ day | Rep, abline = 0)
+plot(d_rm60_CAR1, resid(., type = "normalized") ~ day | Rep, abline = 0)
+
+plot(d_rm60, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(d_rm60_AR1, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(d_rm60_ARMA, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+plot(d_rm60_CAR1, resid(., type = "normalized") ~ fitted(.) | Rep, abline = 0)
+
 #these don't work for rm0
-plot(ACF(d_rm_ARMA, resType = "normalized"), alpha=0.05, main="full mixed, ARMA corr")
+plot(ACF(d_rm60, resType = "normalized"), alpha=0.05, main="full mixed, ARMA corr")
 plot(ACF(d_rmI, resType = "normalized"), alpha=0.05, main="mixed ~1|Rep, no corr")
 plot(ACF(d_rmI_ARMA, resType = "normalized"), alpha=0.05, main="mixed ~1|Rep, ARMA corr")
-#temporal autocorrelation worse????
+
 
 #look at best models
-summary(d_rm0_ARMAa)
-summary(d_rm_ARMA)
-summary(d_rmI_ARMA)
+summary(d_rm60_AR1)
+summary(d_rm60_ARMA)
+summary(d_rm60_CAR1)
+
 #VarCorr(b_rm0_ARMA)
-confint(d_rm0_ARMAa, parm=c("day","Treatment27"))
-intervals(d_rm0_ARMAa, which="all", level=0.95)
-intervals(d_rm_ARMA, which="fixed", level=0.95)
-intervals(d_rmI_ARMA, which="fixed", level=0.95)
-anova(d_rm0_ARMAa)
-anova(d_rm_ARMA)
-anova(d_rmI_ARMA)
+confint(d_rm60_AR1, parm=c("day","Treatment27"))
+intervals(d_rm60_AR1, which="all", level=0.95)
+intervals(d_rm60_ARMA, which="all", level=0.95)
+intervals(d_rm60_CAR1, which="all", level=0.95)
+anova(d_rm60_AR1)
+anova(d_rm60_ARMA)
+anova(d_rm60_CAR1)
+
 fixef(d_rm_ARMA)
-fixef(d_rmI_ARMA)
 ranef(d_rm_ARMA)
-ranef(d_rmI_ARMA)
+
 
 #plot - could also use , type="contrast"
 visreg(d_rm0_ARMAa, "day", by="Treatment", gg=TRUE, overlay=TRUE)
