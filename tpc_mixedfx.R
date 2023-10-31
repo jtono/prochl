@@ -8,6 +8,7 @@ library(tidyr)
 library(dplyr)
 library(broom)
 library(AICcmodavg)
+library(emmeans)
 
 ###########function will need###########
 getslopeslm <- function(data){
@@ -126,7 +127,7 @@ df_grp <- groupedData(sl ~ CenteredTemp | rep, data = tpc_sum)
 
 # fit the model
 #fit with ML so could compare to gnls
-get_start_vals(tpc_sum$temp, tpc_sum$sl, model_name = "gaussian_1987")
+get_start_vals(df_grp$temp, df_grp$sl, model_name = "gaussian_1987")
 #   rmax       topt          a
 #0.6228499 25.0000000 15.0000000
 gaus_nlme <- nlme(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
@@ -136,45 +137,99 @@ gaus_nlme <- nlme(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
                   # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
                   start = c(0.6228499, rep(0, 1), 25, rep(0, 1), 15, rep(0, 1)),
                   na.action = na.omit,
-                  method = 'REML')
+                  method = 'ML')
 summary(gaus_nlme)
-
-#########left off here###########
 
 
 # check the best model fit and check each combination of random effects (update updates the model above without having to write it all out)
-gaus_nlme_b2 <- update(gaus_nlme_b, random = pdDiag(rmax + topt ~ 1))
-gaus_nlme_b3 <- update(gaus_nlme_b, random = pdDiag(rmax + a ~ 1))
-gaus_nlme_b4 <- update(gaus_nlme_b, random = pdDiag(topt + a ~ 1))
-gaus_nlme_b5 <- update(gaus_nlme_b, random = pdDiag(topt ~ 1))
-gaus_nlme_b6 <- update(gaus_nlme_b, random = pdDiag(rmax ~ 1))
-gaus_nlme_b7 <- update(gaus_nlme_b, random = pdDiag(a ~ 1))
+gaus_nlme2 <- update(gaus_nlme, random = pdDiag(rmax + topt ~ 1))
+gaus_nlme3 <- update(gaus_nlme, random = pdDiag(rmax + a ~ 1))
+gaus_nlme4 <- update(gaus_nlme, random = pdDiag(topt + a ~ 1))
+gaus_nlme5 <- update(gaus_nlme, random = pdDiag(topt ~ 1))
+gaus_nlme6 <- update(gaus_nlme, random = pdDiag(rmax ~ 1))
+gaus_nlme7 <- update(gaus_nlme, random = pdDiag(a ~ 1))
 
-gaus_gnls_b8 <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
-                    data = df_grp_b,
+gaus_gnls <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
+                    data = df_grp,
+                    params = list(rmax + topt + a ~ 1+strain),
                     #fixed = list(rmax + topt + a ~ 1),
                     #random = pdDiag(rmax + topt + a ~ 1),
                     # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
-                    start = get_start_vals(b_tpc_sum$temp, b_tpc_sum$sl, model_name = "gaussian_1987"),
+                    start = c(0.6228499, rep(0, 1), 25, rep(0, 1), 15, rep(0, 1)),
                     na.action = na.omit)
-summary(gaus_gnls_b8)
+summary(gaus_gnls)
 
 
 # Do ANOVA style analysis to get AIC and p values on which model fits best
-anova(gaus_nlme_b,gaus_nlme_b2,gaus_nlme_b3,gaus_nlme_b4,gaus_nlme_b5,gaus_nlme_b6,gaus_nlme_b7,gaus_gnls_b8)
+anova(gaus_nlme,gaus_nlme2,gaus_nlme3,gaus_nlme4,gaus_nlme5,gaus_nlme6,gaus_nlme7,gaus_gnls)
 # all pretty much the same. No random effects slightly better AIC.
-########left off here - add more comparisons from Hebe's code with strain##########
 
 
-#################
+# remove treatment effect on rmax (max rate at optimum)
+#gaus_nlme2<- update(gaus_nlme, fixed = list(rmax ~ 1, topt + a ~ 1 + strain), start = c(0.6228499, 25, rep(0, 1), 15, rep(0, 1)))
+gaus_gnls2<- update(gaus_gnls, params = list(rmax ~ 1, topt + a ~ 1 + strain), start = c(0.6228499, 25, rep(0, 1), 15, rep(0, 1)))
 
-comparisons_height <- emmeans(quad_temp_nlme_final, ~ Stress, param = "a")
+# remove treatment effect on topt
+gaus_nlme3<- update(gaus_nlme, fixed = list(topt ~ 1, rmax + a ~ 1 + strain), start = c(25, 0.6228499, rep(0,1), 15, rep(0, 1)))
+gaus_gnls3<- update(gaus_gnls, params = list(topt ~ 1, rmax + a ~ 1 + strain), start = c(25, 0.6228499,rep(0,1), 15, rep(0, 1)))
 
-pairs(comparisons_height)
+# remove treatment effect on a (width)
+gaus_nlme4<- update(gaus_nlme, fixed = list(rmax + topt ~ 1+strain, a ~ 1), start = c(0.6228499, rep(0,1), 25, rep(0, 1), 15))
+gaus_gnls4<- update(gaus_gnls, params = list(rmax + topt ~ 1+strain, a ~ 1), start = c(0.6228499, rep(0,1), 25, rep(0, 1), 15))
 
-comparisons_breadth <- emmeans(quad_temp_nlme_final, ~ Stress, param = "c")
+anova(gaus_nlme, gaus_nlme3, gaus_nlme4, gaus_gnls, gaus_gnls2, gaus_gnls3, gaus_gnls4)
+anova(gaus_nlme, gaus_nlme4, gaus_gnls, gaus_gnls4)
+#quite similar with or without treatment effect on a and with or without random effects. no random and remove treatment effect on a lowest AIC but not significant
+#notably, removing treatment effect on topt (model3) sig worse than full model
+anova(gaus_nlme, gaus_nlme3, gaus_gnls, gaus_gnls3)
+#notably, removing treatment effect on rmax (model2) sig worse than full model
+anova(gaus_gnls, gaus_gnls2)
 
-pairs(comparisons_breadth)
+
+# remove treatment effect on rmax (max rate at optimum) and topt
+#gaus_nlme5<- update(gaus_nlme, fixed = list(rmax +topt ~ 1, a ~ 1 + strain), start = c(0.6228499, 25, 15, rep(0, 1)))
+gaus_gnls5<- update(gaus_gnls, params = list(rmax +topt ~ 1, a ~ 1 + strain), start = c(0.6228499, 25, 15, rep(0, 1)))
+
+# remove treatment effect on topt and a
+#gaus_nlme6<- update(gaus_nlme, fixed = list(topt +a ~ 1, rmax ~ 1 + strain), start = c(25, 15, 0.6228499, rep(0,1)))
+gaus_gnls6<- update(gaus_gnls, params = list(topt +a~ 1, rmax ~ 1 + strain), start = c(25, 15, 0.6228499,rep(0,1)))
+
+# remove treatment effect on a (width) and rmax
+#gaus_nlme7<- update(gaus_nlme, fixed = list(topt ~ 1+strain, rmax + a ~ 1), start = c(25, rep(0, 1), 0.6228499, 15))
+gaus_gnls7<- update(gaus_gnls, params = list(topt ~ 1+strain, rmax + a ~ 1), start = c(25, rep(0, 1), 0.6228499, 15))
+
+anova(gaus_nlme, gaus_nlme4, gaus_gnls, gaus_gnls4, gaus_gnls5, gaus_gnls6, gaus_gnls7)
+#double drops all worse
+anova(gaus_nlme, gaus_gnls,gaus_gnls5, gaus_gnls6, gaus_gnls7)
+anova(gaus_nlme, gaus_gnls,gaus_gnls6, gaus_gnls7)
+anova(gaus_nlme, gaus_gnls,gaus_gnls7)
+anova(gaus_nlme4, gaus_gnls4,gaus_gnls5, gaus_gnls6, gaus_gnls7)
+anova(gaus_nlme4, gaus_gnls4,gaus_gnls6, gaus_gnls7)
+anova(gaus_nlme4, gaus_gnls4,gaus_gnls7)
+
+#use most reduced? - gaus_gnls4
+gaus_gnls_final <- update(gaus_gnls4)
+
+summary(gaus_gnls_final)
+
+#################get the diffs!!#########
+topt +a~ 1, rmax ~ 1 + strain
+
+
+comparisons_topt <- emmeans(gaus_gnls_final, ~ strain, param = "topt")
+
+pairs(comparisons_topt)
+
+comparisons_rmax <- emmeans(gaus_gnls_final, ~ strain, param = "rmax")
+
+pairs(comparisons_rmax)
+
+#this is confusing??
+comparisons_width <- emmeans(gaus_gnls, ~ strain, param = "a")
+
+pairs(comparisons_width)
+
+########left off here##########
 
 # we see that there are significant differences between the height of all curves other than between pH and salinity
 # we see that there is a signifcaint difference between the breadth of the control and the combined stressor trearment
