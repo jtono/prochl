@@ -213,9 +213,6 @@ gaus_gnls_final <- update(gaus_gnls4)
 summary(gaus_gnls_final)
 
 #################get the diffs!!#########
-topt +a~ 1, rmax ~ 1 + strain
-
-
 comparisons_topt <- emmeans(gaus_gnls_final, ~ strain, param = "topt")
 
 pairs(comparisons_topt)
