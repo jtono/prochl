@@ -119,11 +119,11 @@ tpc_sum$CenteredTemp <- as.numeric(tpc_sum$CenteredTemp)
 
 # group the data
 df_grp_b <- groupedData(sl ~ temp | rep, data = b_tpc_sum)
-df_grp_b <- groupedData(sl ~ CenteredTemp | rep, data = b_tpc_sum)
+#df_grp_b <- groupedData(sl ~ CenteredTemp | rep, data = b_tpc_sum)
 df_grp_d <- groupedData(sl ~ temp | rep, data = d_tpc_sum)
-df_grp_d <- groupedData(sl ~ CenteredTemp | rep, data = d_tpc_sum)
+#df_grp_d <- groupedData(sl ~ CenteredTemp | rep, data = d_tpc_sum)
 df_grp <- groupedData(sl ~ temp | rep, data = tpc_sum)
-df_grp <- groupedData(sl ~ CenteredTemp | rep, data = tpc_sum)
+#df_grp <- groupedData(sl ~ CenteredTemp | rep, data = tpc_sum)
 
 # fit the model
 #fit with ML so could compare to gnls
