@@ -151,7 +151,7 @@ gaus_nlme7 <- update(gaus_nlme, random = pdDiag(a ~ 1))
 
 gaus_gnls <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
                     data = df_grp,
-                    params = list(rmax + topt + a ~ 1+strain),
+                    params = list(rmax + topt + a ~ 1 + strain),
                     #fixed = list(rmax + topt + a ~ 1),
                     #random = pdDiag(rmax + topt + a ~ 1),
                     # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
@@ -198,6 +198,10 @@ gaus_gnls6<- update(gaus_gnls, params = list(topt +a~ 1, rmax ~ 1 + strain), sta
 #gaus_nlme7<- update(gaus_nlme, fixed = list(topt ~ 1+strain, rmax + a ~ 1), start = c(25, rep(0, 1), 0.6228499, 15))
 gaus_gnls7<- update(gaus_gnls, params = list(topt ~ 1+strain, rmax + a ~ 1), start = c(25, rep(0, 1), 0.6228499, 15))
 
+gaus_gnls8<- update(gaus_gnls, params = list(topt + rmax + a ~ 1), start = c(25, 0.6228499, 15))
+
+anova(gaus_gnls, gaus_gnls2, gaus_gnls3, gaus_gnls4, gaus_gnls5, gaus_gnls6, gaus_gnls7, gaus_gnls8)
+
 anova(gaus_nlme, gaus_nlme4, gaus_gnls, gaus_gnls4, gaus_gnls5, gaus_gnls6, gaus_gnls7)
 #double drops all worse
 anova(gaus_nlme, gaus_gnls,gaus_gnls5, gaus_gnls6, gaus_gnls7)
@@ -222,15 +226,16 @@ comparisons_rmax <- emmeans(gaus_gnls_final, ~ strain, param = "rmax")
 pairs(comparisons_rmax)
 
 #this is confusing??
-comparisons_width <- emmeans(gaus_gnls, ~ strain, param = "a")
+comparisons_width_full <- emmeans(gaus_gnls, ~ strain, param = "a")
+pairs(comparisons_width_full)
+comparisons_topt_full <- emmeans(gaus_gnls, ~ strain, param = "topt")
+pairs(comparisons_topt_full)
+comparisons_rmax_full <- emmeans(gaus_gnls, ~ strain, param = "rmax")
+pairs(comparisons_rmax_full)
 
-pairs(comparisons_width)
+# sig diff between all param estimated, even though model better without fitting a separately
 
-########left off here##########
-
-# we see that there are significant differences between the height of all curves other than between pH and salinity
-# we see that there is a signifcaint difference between the breadth of the control and the combined stressor trearment
-# but no differences between other treatments.
+#####left off here#######
 
 #####################
 # Create a data frame with the desired temperature levels
