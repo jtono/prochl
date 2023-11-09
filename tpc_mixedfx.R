@@ -75,13 +75,17 @@ b_tpc <- b_tpc[-which(is.na(b_tpc$Actual.Cell.count)),]
 b_tpc$ln_cell_cnt <- log(b_tpc$Actual.Cell.count)
 d_tpc$ln_cell_cnt <- log(d_tpc$Actual.Cell.count)
 
-#'get rid of last 3 points
+#'get rid of last 3 points, points after day 10
 b_tpc <- b_tpc[b_tpc$day<14,]
 d_tpc <- d_tpc[d_tpc$day<14,]
+b_tpc10 <- b_tpc[b_tpc$day<10.5,]
+d_tpc10 <- d_tpc[d_tpc$day<10.5,]
 
 #do linear regression to get data
 b_tpc_sum <- getslopeslm(b_tpc)
 d_tpc_sum <- getslopeslm(d_tpc)
+b_tpc10_sum <- getslopeslm(b_tpc10)
+d_tpc10_sum <- getslopeslm(d_tpc10)
 
 #put in dataframe together
 b_tpc_sum$strain <- "ProB"
@@ -90,11 +94,19 @@ d_tpc_sum$strain <- "ProD"
 d_tpc_sum$rep <- paste(d_tpc_sum$rep, d_tpc_sum$strain)
 tpc_sum <- rbind(b_tpc_sum,d_tpc_sum)
 
+b_tpc10_sum$strain <- "ProB"
+b_tpc10_sum$rep <- paste(b_tpc10_sum$rep, b_tpc10_sum$strain)
+d_tpc10_sum$strain <- "ProD"
+d_tpc10_sum$rep <- paste(d_tpc10_sum$rep, d_tpc10_sum$strain)
+tpc10_sum <- rbind(b_tpc10_sum,d_tpc10_sum)
 
+######left off here adding version cutoff at 10#########
 # center the value around the rough optimum (may need to find a better value for this)
 center_value_b = 23
 center_value_d = 21
 b_tpc_sum <- b_tpc_sum %>%
+  mutate(CenteredTemp = scale(temp, center = center_value_b , scale = FALSE))
+b_tpc10_sum <- b_tpc_sum %>%
   mutate(CenteredTemp = scale(temp, center = center_value_b , scale = FALSE))
 d_tpc_sum <- d_tpc_sum %>%
   mutate(CenteredTemp = scale(temp, center = center_value_d , scale = FALSE))
