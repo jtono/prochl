@@ -13,24 +13,6 @@ library(patchwork)
 library(geomtextpath)
 
 ########functions########
-getslopes <- function(data){
-  treatment <- c()
-  int <- c()
-  sl <- c()
-  rep <- c()
-  for (i in unique(data$Treatment)){
-    sub <- subset(data, Treatment==i)
-    mod <- lmer(log(Actual.Cell.count)~day+(day|Rep.ID), sub)
-    n <- length(unique(sub$Rep.ID))
-    treatment <- c(treatment, rep(i,n))
-    int <- c(int, coef(mod)$Rep.ID[,1])
-    sl <- c(sl, coef(mod)$Rep.ID[,2])
-    rep <- c(rep, rownames(coef(mod)$Rep.ID))
-  }
-  output <- data.frame(temp=treatment, rep, int, sl)
-  return(output)
-}
-
 getslopeslm <- function(data){
   treatment <- c()
   int <- c()
@@ -3032,3 +3014,21 @@ ggplot(d_preds) +
 
 
 
+#########old#############
+getslopes <- function(data){
+  treatment <- c()
+  int <- c()
+  sl <- c()
+  rep <- c()
+  for (i in unique(data$Treatment)){
+    sub <- subset(data, Treatment==i)
+    mod <- lmer(log(Actual.Cell.count)~day+(day|Rep.ID), sub)
+    n <- length(unique(sub$Rep.ID))
+    treatment <- c(treatment, rep(i,n))
+    int <- c(int, coef(mod)$Rep.ID[,1])
+    sl <- c(sl, coef(mod)$Rep.ID[,2])
+    rep <- c(rep, rownames(coef(mod)$Rep.ID))
+  }
+  output <- data.frame(temp=treatment, rep, int, sl)
+  return(output)
+}
