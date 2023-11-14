@@ -1,4 +1,5 @@
 library(ggplot2)
+library(ggpubr)
 library(dplyr)
 library(lme4)
 library(tidyverse) #install.packages(tidyverse)
@@ -43,9 +44,12 @@ d_tpc <- read.csv("Pc_D_TPC.csv", sep=",", as.is=TRUE, header=TRUE)
 #cut extra rows from b_tpc
 b_tpc <- b_tpc[1:408,]
 
-#get rid of ones not numbers in d_tpc and make numeric
+#get rid of ones not counted in d_tpc and make Actual cell count numeric
 d_tpc <- d_tpc[-which(d_tpc$Actual.Cell.count=="#VALUE!"),]
 d_tpc$Actual.Cell.count <- as.numeric(d_tpc$Actual.Cell.count)
+
+#remove ones not counted in b_tpc
+b_tpc <- b_tpc[-which(is.na(b_tpc$Actual.Cell.count)),]
 
 #extract date information
 b_tpc$Date <- NA
@@ -72,23 +76,26 @@ d_tpc$Treatment <- as.numeric(d_tpc$Treatment)
 b_tpc$Treatment <- sub("c","",b_tpc$Treatment)
 b_tpc$Treatment <- as.numeric(b_tpc$Treatment)
 
-#remove NAs from b_tpc
-b_tpc <- b_tpc[-which(is.na(b_tpc$Actual.Cell.count)),]
-
-#add log cell count column
-b_tpc$ln_cell_cnt <- log(b_tpc$Actual.Cell.count)
-d_tpc$ln_cell_cnt <- log(d_tpc$Actual.Cell.count)
-
 #####plot growth curves######
-ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+######here - make plots nicer########
+grB <-
+  ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col="red"))+
   geom_point()+
-  geom_line(aes(group=Rep.ID))+
+  geom_point(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col="blue"))+
+  facet_wrap(~Treatment)+
+  labs(x = 'Day',
+       y = 'ln(Cell Count)',
+       title = 'MED4')
+
+grD <- ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count)))+
+  geom_point()+
   facet_wrap(~Treatment)
 
-ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
+ggarrange(grB, grD)
+
+
+
+
 
 #do linear regression to get data - all data
 b_tpc_sum <- getslopes(b_tpc)
@@ -3032,3 +3039,8 @@ getslopes <- function(data){
   output <- data.frame(temp=treatment, rep, int, sl)
   return(output)
 }
+
+#add log cell count column
+b_tpc$ln_cell_cnt <- log(b_tpc$Actual.Cell.count)
+d_tpc$ln_cell_cnt <- log(d_tpc$Actual.Cell.count)
+
