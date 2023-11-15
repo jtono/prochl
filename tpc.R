@@ -13,28 +13,26 @@ library(MuMIn)
 library(patchwork)
 library(geomtextpath)
 
-########functions########
+
+###########function needed######
 getslopeslm <- function(data){
   treatment <- c()
   int <- c()
   sl <- c()
+  spp <- c()
   rep <- c()
-  for (i in unique(data$Treatment)){
-    sub <- subset(data, Treatment==i)
-    for (j in unique(sub$Rep.ID)){
-      sub2 <- subset(sub, Rep.ID==j)
-      mod <- lm(log(Actual.Cell.count)~day, sub2)
-      treatment <- c(treatment, i)
-      int <- c(int, coef(mod)[1])
-      sl <- c(sl, coef(mod)[2])
-      rep <- c(rep, j)
+  for (i in unique(data$rep)){
+    sub <- subset(data, rep==i)
+    mod <- lm(log(Actual.Cell.count)~day, sub)
+    treatment <- c(treatment, sub$Treatment[1])
+    int <- c(int, coef(mod)[1])
+    sl <- c(sl, coef(mod)[2])
+    rep <- c(rep, i)
+    spp <- c(spp, sub$Spp[1])
     }
-  }
-  output <- data.frame(temp=treatment, rep, int, sl)
+  output <- data.frame(temp=treatment, rep, spp, int, sl)
   return(output)
 }
-
-
 
 #####getting data ready#####
 #read in data
@@ -47,6 +45,7 @@ b_tpc <- b_tpc[1:408,]
 #get rid of ones not counted in d_tpc and make Actual cell count numeric
 d_tpc <- d_tpc[-which(d_tpc$Actual.Cell.count=="#VALUE!"),]
 d_tpc$Actual.Cell.count <- as.numeric(d_tpc$Actual.Cell.count)
+d_tpc$Cell.count <- as.numeric(d_tpc$Cell.count)
 
 #remove ones not counted in b_tpc
 b_tpc <- b_tpc[-which(is.na(b_tpc$Actual.Cell.count)),]
@@ -76,512 +75,55 @@ d_tpc$Treatment <- as.numeric(d_tpc$Treatment)
 b_tpc$Treatment <- sub("c","",b_tpc$Treatment)
 b_tpc$Treatment <- as.numeric(b_tpc$Treatment)
 
+#merge the two
+com_col <- intersect(colnames(b_tpc), colnames(d_tpc))
+tpc <- rbind(b_tpc[,com_col],d_tpc[,com_col])
+tpc$tret_sp <- paste(tpc$Treatment, tpc$Spp)
+tpc$rep <- paste(tpc$Rep.ID,tpc$tret_sp)
+
+
 #####plot growth curves######
-######here - make plots nicer########
-grB <-
-  ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col="red"))+
-  geom_point()+
-  geom_point(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col="blue"))+
-  facet_wrap(~Treatment)+
-  labs(x = 'Day',
-       y = 'ln(Cell Count)',
-       title = 'MED4')
-
-grD <- ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count)))+
-  geom_point()+
-  facet_wrap(~Treatment)
-
-ggarrange(grB, grD)
-
-
-
-
-
-#do linear regression to get data - all data
-b_tpc_sum <- getslopes(b_tpc)
-d_tpc_sum <- getslopes(d_tpc)
-b_tpc_sumlm <- getslopeslm(b_tpc)
-d_tpc_sumlm <- getslopeslm(d_tpc)
-
-#####do rolling regression - 6#####
-# create the rolling regression function
-roll_regress <- function(x){
-  temp <- data.frame(x)
-  mod <- lm(temp)
-  temp <- data.frame(slope = coef(mod)[[2]],
-                     slope_lwr = confint(mod)[2, ][[1]],
-                     slope_upr = confint(mod)[2, ][[2]],
-                     intercept = coef(mod)[[1]],
-                     rsq = summary(mod)$r.squared, stringsAsFactors = FALSE)
-  return(temp)
-}
-# define window - here every 3 points
-num_points = 3
-
-# run rolling regression on ln_cell_cnt ~ day
-#b
-models_b <- b_tpc %>%
-  group_by(Rep.ID, Treatment) %>%
-  do(cbind(model = dplyr::select(., ln_cell_cnt, day) %>%
-             zoo::rollapplyr(width = num_points, roll_regress, by.column = FALSE, fill = NA, align = 'center'),
-           time = dplyr::select(., day),
-           ln_od = dplyr::select(., ln_cell_cnt))) %>%
-  rename_all(., gsub, pattern = 'model.', replacement = '')
-# calculate growth rate for each one
-b_gr_roll6 <- models_b %>%
-  filter(slope == max(slope, na.rm = TRUE)) %>%
-  ungroup()
-
-names(b_gr_roll6)[1] <- "rep"
-names(b_gr_roll6)[2] <- "temp"
-names(b_gr_roll6)[3] <- "sl"
-
-#d
-models_d <- d_tpc %>%
-  group_by(Rep.ID, Treatment) %>%
-  do(cbind(model = dplyr::select(., ln_cell_cnt, day) %>%
-             zoo::rollapplyr(width = num_points, roll_regress, by.column = FALSE, fill = NA, align = 'center'),
-           time = dplyr::select(., day),
-           ln_od = dplyr::select(., ln_cell_cnt))) %>%
-  rename_all(., gsub, pattern = 'model.', replacement = '')
-# calculate growth rate for each one
-d_gr_roll6 <- models_d %>%
-  filter(slope == max(slope, na.rm = TRUE)) %>%
-  ungroup()
-
-names(d_gr_roll6)[1] <- "rep"
-names(d_gr_roll6)[2] <- "temp"
-names(d_gr_roll6)[3] <- "sl"
-
-#####fit with growthrates package - 7#####
-#a - with easy linear fit
-L_b <- all_easylinear(Actual.Cell.count ~ day | Rep.ID + Treatment, data=b_tpc)
-b_tpc7a_sum <- results(L_b)
-
-names(b_tpc7a_sum)[1] <- "rep"
-names(b_tpc7a_sum)[2] <- "temp"
-names(b_tpc7a_sum)[5] <- "sl"
-
-L_d <- all_easylinear(Actual.Cell.count ~ day | Rep.ID + Treatment, data=d_tpc)
-d_tpc7a_sum <- results(L_d)
-
-names(d_tpc7a_sum)[1] <- "rep"
-names(d_tpc7a_sum)[2] <- "temp"
-names(d_tpc7a_sum)[5] <- "sl"
-
-#b - with nonparametric smoothing splines
-many_spline_fits_b <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = b_tpc)
-b_tpc7b_sum <- results(many_spline_fits_b)
-
-names(b_tpc7b_sum)[1] <- "rep"
-names(b_tpc7b_sum)[2] <- "temp"
-names(b_tpc7b_sum)[4] <- "sl"
-
-many_spline_fits_d <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = d_tpc)
-d_tpc7b_sum <- results(many_spline_fits_d)
-
-names(d_tpc7b_sum)[1] <- "rep"
-names(d_tpc7b_sum)[2] <- "temp"
-names(d_tpc7b_sum)[4] <- "sl"
-
-#again with spar set to 0.5 (moderate value)
-#https://tpetzoldt.github.io/growthrates/doc/Introduction.html#nonparametric-smoothing-splines
-many_spline_fits_b <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = b_tpc, spar = 0.5)
-b_tpc7b05_sum <- results(many_spline_fits_b)
-
-names(b_tpc7b05_sum)[1] <- "rep"
-names(b_tpc7b05_sum)[2] <- "temp"
-names(b_tpc7b05_sum)[4] <- "sl"
-
-many_spline_fits_d <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = d_tpc, spar = 0.5)
-d_tpc7b05_sum <- results(many_spline_fits_d)
-
-names(d_tpc7b05_sum)[1] <- "rep"
-names(d_tpc7b05_sum)[2] <- "temp"
-names(d_tpc7b05_sum)[4] <- "sl"
-
-
-#####cut to exponential phase - 1) cut off points clearly decreased at end####
-#'get rid of:
-#'b - 25 - 16 - all reps
-#'b - 27 - 15+16 - all reps
-#'d - 20 - 16 - all
-#'d - 23 - 15+16 - all
-#'d - 25 - 15+16 - all
-b_tpc1 <- b_tpc[-which(b_tpc$Treatment==25&b_tpc$day==16|b_tpc$Treatment==27&b_tpc$day%in%c(15,16)),]
-d_tpc1 <- d_tpc[-which(d_tpc$Treatment==20&d_tpc$day==16|d_tpc$Treatment==23&d_tpc$day%in%c(15,16)|d_tpc$Treatment==25&d_tpc$day%in%c(15,16)),]
-
-#check growth curves - edited to show fit lines
-b_tpc1$temp_rep <- paste(b_tpc1$Treatment,b_tpc1$Rep.ID)
-b_tpc1_sumlm$temp_rep <- paste(b_tpc1_sumlm$temp,b_tpc1_sumlm$rep)
-p <- ggplot(data=b_tpc1, aes(x=day, y=log(Actual.Cell.count), col=c(Treatment)))+
-  geom_point()+
-  geom_line(aes(group=temp_rep))+
-  facet_wrap(~Treatment)
-p+geom_abline(slope=b_tpc1_sumlm$sl, intercept=b_tpc1_sumlm$int, col=c(b_tpc1_sumlm$temp))+facet_wrap(~b_tpc1_sumlm$temp)
-
-
-ggplot(data=d_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-#do linear regression to get data
-b_tpc1_sum <- getslopes(b_tpc1)
-d_tpc1_sum <- getslopes(d_tpc1)
-
-b_tpc1_sumlm <- getslopeslm(b_tpc1)
-d_tpc1_sumlm <- getslopeslm(d_tpc1)
-
-#####cut to exponential phase - 1b) cut off points clearly decreased at end####
-#'get rid of last 3 points
-b_tpc1b <- b_tpc[b_tpc$day<14,]
-d_tpc1b <- d_tpc[d_tpc$day<14,]
-
-#check growth curves
-ggplot(data=b_tpc1b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-ggplot(data=d_tpc1b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-#do linear regression to get data
-b_tpc1b_sumlm <- getslopeslm(b_tpc1b)
-d_tpc1b_sumlm <- getslopeslm(d_tpc1b)
-
-#if cut to first 10 is it different?
-b_tpc1b10 <- b_tpc[b_tpc$day<10.5,]
-d_tpc1b10 <- d_tpc[d_tpc$day<10.5,]
-
-b_tpc1b10_sumlm <- getslopeslm(b_tpc1b10)
-d_tpc1b10_sumlm <- getslopeslm(d_tpc1b10)
-
-#compare to each other and full
-ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  geom_vline(xintercept=10.5, linetype="dotted")+
-  geom_vline(xintercept=13.5, linetype="dotted")+
-  facet_wrap(~Treatment)+
-  labs(x = 'Day',
-     y = 'log(Actual Cell Count)',
-     title = 'ProB')
-
-ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  geom_vline(xintercept=10.5, linetype="dotted")+
-  geom_vline(xintercept=13.5, linetype="dotted")+
-  facet_wrap(~Treatment)+
-  labs(x = 'Day',
-       y = 'log(Actual Cell Count)',
-       title = 'ProD')
-
-b_compare <- merge(b_tpc1b_sumlm, b_tpc1b10_sumlm, by=c("temp","rep"))
-b_comp <- merge(b_compare, b_tpc_sumlm, by=c("temp","rep"))
-names(b_comp) = c("temp","rep","int1b","sl1b","int1b10","sl1b10","int","sl")
-plot(b_comp$sl~jitter(b_comp$temp,2), pch=16, col=1, ylim=c(-0.2,0.8), main="ProB")
-points(b_comp$sl1b~jitter(b_comp$temp,2), pch=16, col=2)
-points(b_comp$sl1b10~jitter(b_comp$temp,2), pch=16, col=3)
-
-d_compare <- merge(d_tpc1b_sumlm, d_tpc1b10_sumlm, by=c("temp","rep"))
-d_comp <- merge(d_compare, d_tpc_sumlm, by=c("temp","rep"))
-names(d_comp) = c("temp","rep","int1b","sl1b","int1b10","sl1b10","int","sl")
-plot(d_comp$sl~jitter(d_comp$temp,2), pch=16, col=1, ylim=c(-0.2,0.8), main="ProD")
-points(d_comp$sl1b~jitter(d_comp$temp,2), pch=16, col=2)
-points(d_comp$sl1b10~jitter(d_comp$temp,2), pch=16, col=3)
-
-
-
-#####cut to exponential phase - 2) also cut off weird measurements####
-#'get rid of:
-#'b - 18 - 11 - R3
-#'b - 27 - 11 - R3
-#'b-29-15-all
-#'b-30-5-R1
-#'d-15-7-all
-#'d-20-7-R1
-#'d-30-7-R1
-
-b_tpc2 <- b_tpc1[-which(b_tpc1$Treatment==18&b_tpc1$day==11&b_tpc1$Rep.ID=="R3"|b_tpc1$Treatment==27&b_tpc1$day==11&b_tpc1$Rep.ID=="R3"|b_tpc1$Treatment==29&b_tpc1$day==15|b_tpc1$Treatment==30&b_tpc1$day==5&b_tpc1$Rep.ID=="R1"),]
-d_tpc2 <- d_tpc1[-which(d_tpc1$Treatment==15&d_tpc1$day==7|d_tpc1$Treatment==20&d_tpc1$day==7&d_tpc1$Rep.ID=="R1"|d_tpc1$Treatment==30&d_tpc1$day==7&d_tpc1$Rep.ID=="R1"),]
-
-#check growth curves
-ggplot(data=b_tpc2, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-ggplot(data=d_tpc2, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-#do linear regression to get data
-b_tpc2_sum <- getslopes(b_tpc2)
-d_tpc2_sum <- getslopes(d_tpc2)
-
-b_tpc2_sumlm <- getslopeslm(b_tpc2)
-d_tpc2_sumlm <- getslopeslm(d_tpc2)
-
-#####cut to exponential phase - 3) trim ends - only days 5-11 a) with other mods####
-b_tpc3a <- b_tpc2[-which(b_tpc2$day<5|b_tpc2$day>11),]
-d_tpc3a <- d_tpc2[-which(d_tpc2$day<5|d_tpc2$day>11),]
-
-#check growth curves
-ggplot(data=b_tpc3a, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-ggplot(data=d_tpc3a, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-#do linear regression to get data
-b_tpc3a_sum <- getslopes(b_tpc3a)
-d_tpc3a_sum <- getslopes(d_tpc3a)
-
-b_tpc3a_sumlm <- getslopeslm(b_tpc3a)
-d_tpc3a_sumlm <- getslopeslm(d_tpc3a)
-
-#####cut to exponential phase - 3) trim ends - only days 5-11 b) without other mods####
-b_tpc3b <- b_tpc[-which(b_tpc$day<5|b_tpc$day>11),]
-d_tpc3b <- d_tpc[-which(d_tpc$day<5|d_tpc$day>11),]
-
-#check growth curves
-ggplot(data=b_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-ggplot(data=d_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
-  geom_point()+
-  geom_line(aes(group=Rep.ID))+
-  facet_wrap(~Treatment)
-
-#do linear regression to get data
-b_tpc3b_sum <- getslopes(b_tpc3b)
-d_tpc3b_sum <- getslopes(d_tpc3b)
-
-b_tpc3b_sumlm <- getslopeslm(b_tpc3b)
-d_tpc3b_sumlm <- getslopeslm(d_tpc3b)
-
-#####!!DOESNT WORK>???? cut to exponential phase - 4) try to automatically detect linear portion####
-par(mfrow=c(3,3), mar=c(1,1,1,1))
-temp <- c()
-rep <- c()
-sl <- c()
-int <- c()
-for (i in unique(b_tpc$Treatment)){
-  for (j in unique(b_tpc$Rep.ID)){
-    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
-    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
-    mod <- lm(y~x, dat)
-    while(summary(mod)$r.squared < 0.95){
-      dat <- dat[-order(abs(mod$residuals), decreasing=TRUE)[1],]
-      mod <- lm(y~x, dat)
-    }
-    plot(y~x, data=dat, ylim=c(6,20), xlim=c(0,18))
-    temp <- c(temp, i)
-    rep <- c(rep, j)
-    sl <- c(sl, mod$coefficients[2])
-    int <- c(int, mod$coefficients[1])
-  }
-}
-
-#put data in dataframe
-b_tpc4_sum <- data.frame(temp, rep, sl, int)
-
-#d
-par(mfrow=c(3,3), mar=c(1,1,1,1))
-temp <- c()
-rep <- c()
-sl <- c()
-int <- c()
-for (i in unique(d_tpc$Treatment)){
-  for (j in unique(d_tpc$Rep.ID)){
-    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
-    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
-    mod <- lm(y~x, dat)
-    while(summary(mod)$r.squared < 0.95){
-      dat <- dat[-order(abs(mod$residuals), decreasing=TRUE)[1],]
-      mod <- lm(y~x, dat)
-    }
-    plot(y~x, data=dat, ylim=c(6,20), xlim=c(0,18))
-    temp <- c(temp, i)
-    rep <- c(rep, j)
-    sl <- c(sl, mod$coefficients[2])
-    int <- c(int, mod$coefficients[1])
-  }
-}
-
-#put data in dataframe
-d_tpc4_sum <- data.frame(temp, rep, sl, int)
-
-#####cut to exponential phase - 5) try max gr a) use code from PhD####
-#functions needed
-nderiv <- function(fit, x, eps=1e-5)
-  (predict(fit, x + eps) - predict(fit, x - eps))/(2 * eps)
-
-spline.slope <- function(x, y, n, eps=1e-5)
-  max(nderiv(loess(log(y) ~ x, degree=1, span=0.2),
-             seq(min(x), max(x), length=n)), na.rm=TRUE)
-#d
-temp <- c()
-rep <- c()
-sl <- c()
-for (i in unique(d_tpc$Treatment)){
-  for (j in unique(d_tpc$Rep.ID)){
-    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
-    k <- spline.slope(sub$day, sub$Actual.Cell.count, length(sub$File.ID))
-    temp <- c(temp, i)
-    rep <- c(rep, j)
-    sl <- c(sl, k)
-  }
-}
-
-#put data in dataframe
-d_tpc5a_sum <- data.frame(temp, rep, sl)
-
-#b
-temp <- c()
-rep <- c()
-sl <- c()
-for (i in unique(b_tpc$Treatment)){
-  for (j in unique(b_tpc$Rep.ID)){
-    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
-    k <- spline.slope(sub$day, sub$Actual.Cell.count, length(sub$File.ID))
-    temp <- c(temp, i)
-    rep <- c(rep, j)
-    sl <- c(sl, k)
-  }
-}
-
-#put data in dataframe
-b_tpc5a_sum <- data.frame(temp, rep, sl)
-
-#!!!!many warnings
-#!!!didn't work for d at all
-
-#####cut to exponential phase - 5) try max gr b) lm 3 pts with R2 > 0.95####
-#d
-temp <- c()
-rep <- c()
-maxsl <- c()
-for (i in unique(d_tpc$Treatment)){
-  for (j in unique(d_tpc$Rep.ID)){
-    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
-    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
-    sl<-c()
-    for (k in 1:(length(dat$x)-2)){
-      mod <- lm(y[k:(k+2)]~x[k:(k+2)], dat)
-      if(summary(mod)$r.squared > 0.95){
-        sl <- c(sl, mod$coefficients[2])}
-    }
-    maxsl <- c(maxsl,max(sl))
-    temp <- c(temp, i)
-    rep <- c(rep, j)
-    }
-}
-
-#put data in dataframe
-d_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
-
-#b
-temp <- c()
-rep <- c()
-maxsl <- c()
-for (i in unique(b_tpc$Treatment)){
-  for (j in unique(b_tpc$Rep.ID)){
-    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
-    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
-    sl<-c()
-    for (k in 1:(length(dat$x)-2)){
-      mod <- lm(y[k:(k+2)]~x[k:(k+2)], dat)
-      if(summary(mod)$r.squared > 0.95){
-        sl <- c(sl, mod$coefficients[2])}
-    }
-    maxsl <- c(maxsl,max(sl))
-    temp <- c(temp, i)
-    rep <- c(rep, j)
-  }
-}
-
-#put data in dataframe
-b_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
-
-#####compare slopes#######
-#compare slopes
-plot(b_tpc_sum$sl~jitter(b_tpc_sum$temp,2), ylim=c(0,2))
-points(b_tpc_sumlm$sl~jitter(b_tpc_sumlm$temp,2), col="grey")
-points(b_tpc1_sum$sl~jitter(b_tpc1_sum$temp,2), col="blue")
-points(b_tpc1_sumlm$sl~jitter(b_tpc1_sumlm$temp,2), col="darkblue")
-points(b_tpc2_sum$sl~jitter(b_tpc2_sum$temp,2), col="red")
-points(b_tpc2_sumlm$sl~jitter(b_tpc2_sumlm$temp,2), col="darkred")
-points(b_tpc3a_sum$sl~jitter(b_tpc3a_sum$temp,2), col="violet")
-points(b_tpc3a_sumlm$sl~jitter(b_tpc3a_sumlm$temp,2), col="purple")
-points(b_tpc3b_sum$sl~jitter(b_tpc3b_sum$temp,2), col="green")
-points(b_tpc3b_sumlm$sl~jitter(b_tpc3b_sumlm$temp,2), col="darkgreen")
-points(b_tpc4_sum$sl~jitter(b_tpc4_sum$temp,2), col="orange", pch=16)
-points(b_tpc5a_sum$sl~jitter(b_tpc5a_sum$temp,2), col="lightblue", pch=16)
-points(b_tpc5b_sum$sl~jitter(b_tpc5b_sum$temp,2), col="yellow", pch=16)
-points(b_gr_roll6$sl~jitter(b_gr_roll6$temp,2), col="pink", pch=18)
-points(b_tpc7a_sum$sl~jitter(b_tpc7a_sum$temp,2), col="cyan", pch=18)
-points(b_tpc7b_sum$sl~jitter(b_tpc7b_sum$temp,2), col="magenta", pch=18)
-points(b_tpc7b05_sum$sl~jitter(b_tpc7b05_sum$temp,2), col="brown", pch=18)
-#'similar by eye except light blue
-#'some points for pink, magenta quite different (because didn't trim data?)
-
-plot(d_tpc_sum$sl~jitter(d_tpc_sum$temp,2), ylim=c(0,1))
-points(d_tpc_sumlm$sl~jitter(d_tpc_sumlm$temp,2), col="grey")
-points(d_tpc1_sum$sl~jitter(d_tpc1_sum$temp,2), col="blue")
-points(d_tpc1_sumlm$sl~jitter(d_tpc1_sumlm$temp,2), col="darkblue")
-points(d_tpc2_sum$sl~jitter(d_tpc2_sum$temp,2), col="red")
-points(d_tpc2_sumlm$sl~jitter(d_tpc2_sumlm$temp,2), col="darkred")
-points(d_tpc3a_sum$sl~jitter(d_tpc3a_sum$temp,2), col="violet")
-points(d_tpc3a_sumlm$sl~jitter(d_tpc3a_sumlm$temp,2), col="purple")
-points(d_tpc3b_sum$sl~jitter(d_tpc3b_sum$temp,2), col="green")
-points(d_tpc3b_sumlm$sl~jitter(d_tpc3b_sumlm$temp,2), col="darkgreen")
-points(d_tpc4_sum$sl~jitter(d_tpc4_sum$temp,2), col="orange", pch=16)
-points(d_tpc5a_sum$sl~jitter(d_tpc5a_sum$temp,2), col="lightblue", pch=16)
-points(d_tpc5b_sum$sl~jitter(d_tpc5b_sum$temp,2), col="yellow", pch=16)
-points(d_gr_roll6$sl~jitter(d_gr_roll6$temp,2), col="pink", pch=18)
-points(d_tpc7a_sum$sl~jitter(d_tpc7a_sum$temp,2), col="cyan", pch=18)
-points(d_tpc7b_sum$sl~jitter(d_tpc7b_sum$temp,2), col="magenta", pch=18)
-points(d_tpc7b05_sum$sl~jitter(d_tpc7b05_sum$temp,2), col="brown", pch=18)
-#pretty similar by eye except light blue and yellow
-#'light blue very wrong
-#'yellow, pink, magenta (although magenta even higher)  much higher for higher ones
-#'black and grey lower for higher growing ones
-
-#######fit tpcs - b#####
-
-#'all data sources for b:
-data_b <- list("lmer" = b_tpc_sum,"lm" = b_tpc_sumlm, "lmer1"=b_tpc1_sum, "lm1"=b_tpc1_sumlm, "lmer2"=b_tpc2_sum,"lm2"=b_tpc2_sumlm, "lmer3a"=b_tpc3a_sum,"lm3a"=b_tpc3a_sumlm,"lmer3b"=b_tpc3b_sum,"lm3b"=b_tpc3b_sumlm,"gr4"=b_tpc4_sum,"gr5a"=b_tpc5a_sum, "gr5b"=b_tpc5b_sum, "gr6"=b_gr_roll6, "gr7a"=b_tpc7a_sum, "gr7b"=b_tpc7b_sum, "gr7b05"=b_tpc7b05_sum)
+ggplot(data=tpc, aes(x=day, y=log(Actual.Cell.count), col=Spp))+
+geom_point()+
+geom_line(aes(group=rep))+
+geom_vline(xintercept=10.5, lty=3)+
+geom_vline(xintercept=13.5, lty=3)+
+facet_wrap(~Treatment)+
+labs(x = 'Day',
+     y = 'ln(Cell Count)')
+
+########get growth rates from linear regression#####
+tpc_sum <- getslopeslm(tpc)
+
+#cutoff after 13 days of growth
+tpc13 <- tpc[tpc$day<13.5,]
+tpc13_sum <- getslopeslm(tpc13)
+
+#cutoff after 10 days of growth
+tpc10 <- tpc[tpc$day<10.5,]
+tpc10_sum <- getslopeslm(tpc10)
+
+#######fit tpcs#####
+#'all data sources:
+tpc_data <- list("lm" = tpc_sum, "lm13" = tpc13_sum, "lm10" = tpc10_sum)
 
 #'for each data source, fit all models in: -	Boatman_2017, sharpeschoolfull_1981, modifiedgaussian_2006, oneill_1972, Thomas_2012, briere2_1999, quadratic_2008, johnsonlewin_1946 - cut cuz errors, Hinshelwood_1947, lactin2_1995 added cuz good with -ve values
 #'extract convergence tolerance and AIC for each
-#'keep track of: dataset, rep, model, AICc
+#'keep track of: dataset, model, AICc, spp
 d_name <- c()
-rep_name <- c()
+spp <- c()
 mod <- c()
 aic <- c()
 aicc <- c()
 topt <- c()
 
 #Boatman_2017
-for (i in 1:length(data_b)){
-  for (j in unique(data_b[[i]]$rep)){
-    sub <- subset(data_b[[i]], rep==j)
-    d_name <- c(d_name,names(data_b[i]))
-    rep_name <- c(rep_name, j)
+for (i in 1:length(tpc_data)){
+  for (j in unique(tpc_data[[i]]$spp)){
+    sub <- subset(tpc_data[[i]], spp==j)
+    d_name <- c(d_name,names(tpc_data[i]))
     mod <- c(mod, "boatman_2017")
+    spp <- c(spp, j)
 
     # get start vals
     start_vals <- get_start_vals(sub$temp, sub$sl, model_name = "boatman_2017")
@@ -604,7 +146,9 @@ for (i in 1:length(data_b)){
   }
 }
 
-b_fit_results <- data.frame(d_name, rep_name, mod, aic, aicc, topt)
+b_fit_results <- data.frame(d_name, spp, mod, aic, aicc, topt)
+
+#######here - do rest as first one#######
 
 #sharpeschoolfull_1981, tref=23
 d_name <- c()
@@ -3044,3 +2588,464 @@ getslopes <- function(data){
 b_tpc$ln_cell_cnt <- log(b_tpc$Actual.Cell.count)
 d_tpc$ln_cell_cnt <- log(d_tpc$Actual.Cell.count)
 
+
+#####do rolling regression - 6#####
+# create the rolling regression function
+roll_regress <- function(x){
+  temp <- data.frame(x)
+  mod <- lm(temp)
+  temp <- data.frame(slope = coef(mod)[[2]],
+                     slope_lwr = confint(mod)[2, ][[1]],
+                     slope_upr = confint(mod)[2, ][[2]],
+                     intercept = coef(mod)[[1]],
+                     rsq = summary(mod)$r.squared, stringsAsFactors = FALSE)
+  return(temp)
+}
+# define window - here every 3 points
+num_points = 3
+
+# run rolling regression on ln_cell_cnt ~ day
+#b
+models_b <- b_tpc %>%
+  group_by(Rep.ID, Treatment) %>%
+  do(cbind(model = dplyr::select(., ln_cell_cnt, day) %>%
+             zoo::rollapplyr(width = num_points, roll_regress, by.column = FALSE, fill = NA, align = 'center'),
+           time = dplyr::select(., day),
+           ln_od = dplyr::select(., ln_cell_cnt))) %>%
+  rename_all(., gsub, pattern = 'model.', replacement = '')
+# calculate growth rate for each one
+b_gr_roll6 <- models_b %>%
+  filter(slope == max(slope, na.rm = TRUE)) %>%
+  ungroup()
+
+names(b_gr_roll6)[1] <- "rep"
+names(b_gr_roll6)[2] <- "temp"
+names(b_gr_roll6)[3] <- "sl"
+
+#d
+models_d <- d_tpc %>%
+  group_by(Rep.ID, Treatment) %>%
+  do(cbind(model = dplyr::select(., ln_cell_cnt, day) %>%
+             zoo::rollapplyr(width = num_points, roll_regress, by.column = FALSE, fill = NA, align = 'center'),
+           time = dplyr::select(., day),
+           ln_od = dplyr::select(., ln_cell_cnt))) %>%
+  rename_all(., gsub, pattern = 'model.', replacement = '')
+# calculate growth rate for each one
+d_gr_roll6 <- models_d %>%
+  filter(slope == max(slope, na.rm = TRUE)) %>%
+  ungroup()
+
+names(d_gr_roll6)[1] <- "rep"
+names(d_gr_roll6)[2] <- "temp"
+names(d_gr_roll6)[3] <- "sl"
+
+#####fit with growthrates package - 7#####
+#a - with easy linear fit
+L_b <- all_easylinear(Actual.Cell.count ~ day | Rep.ID + Treatment, data=b_tpc)
+b_tpc7a_sum <- results(L_b)
+
+names(b_tpc7a_sum)[1] <- "rep"
+names(b_tpc7a_sum)[2] <- "temp"
+names(b_tpc7a_sum)[5] <- "sl"
+
+L_d <- all_easylinear(Actual.Cell.count ~ day | Rep.ID + Treatment, data=d_tpc)
+d_tpc7a_sum <- results(L_d)
+
+names(d_tpc7a_sum)[1] <- "rep"
+names(d_tpc7a_sum)[2] <- "temp"
+names(d_tpc7a_sum)[5] <- "sl"
+
+#b - with nonparametric smoothing splines
+many_spline_fits_b <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = b_tpc)
+b_tpc7b_sum <- results(many_spline_fits_b)
+
+names(b_tpc7b_sum)[1] <- "rep"
+names(b_tpc7b_sum)[2] <- "temp"
+names(b_tpc7b_sum)[4] <- "sl"
+
+many_spline_fits_d <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = d_tpc)
+d_tpc7b_sum <- results(many_spline_fits_d)
+
+names(d_tpc7b_sum)[1] <- "rep"
+names(d_tpc7b_sum)[2] <- "temp"
+names(d_tpc7b_sum)[4] <- "sl"
+
+#again with spar set to 0.5 (moderate value)
+#https://tpetzoldt.github.io/growthrates/doc/Introduction.html#nonparametric-smoothing-splines
+many_spline_fits_b <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = b_tpc, spar = 0.5)
+b_tpc7b05_sum <- results(many_spline_fits_b)
+
+names(b_tpc7b05_sum)[1] <- "rep"
+names(b_tpc7b05_sum)[2] <- "temp"
+names(b_tpc7b05_sum)[4] <- "sl"
+
+many_spline_fits_d <- all_splines(Actual.Cell.count ~ day | Rep.ID + Treatment, data = d_tpc, spar = 0.5)
+d_tpc7b05_sum <- results(many_spline_fits_d)
+
+names(d_tpc7b05_sum)[1] <- "rep"
+names(d_tpc7b05_sum)[2] <- "temp"
+names(d_tpc7b05_sum)[4] <- "sl"
+
+
+#####cut to exponential phase - 1) cut off points clearly decreased at end####
+#'get rid of:
+#'b - 25 - 16 - all reps
+#'b - 27 - 15+16 - all reps
+#'d - 20 - 16 - all
+#'d - 23 - 15+16 - all
+#'d - 25 - 15+16 - all
+b_tpc1 <- b_tpc[-which(b_tpc$Treatment==25&b_tpc$day==16|b_tpc$Treatment==27&b_tpc$day%in%c(15,16)),]
+d_tpc1 <- d_tpc[-which(d_tpc$Treatment==20&d_tpc$day==16|d_tpc$Treatment==23&d_tpc$day%in%c(15,16)|d_tpc$Treatment==25&d_tpc$day%in%c(15,16)),]
+
+#check growth curves - edited to show fit lines
+b_tpc1$temp_rep <- paste(b_tpc1$Treatment,b_tpc1$Rep.ID)
+b_tpc1_sumlm$temp_rep <- paste(b_tpc1_sumlm$temp,b_tpc1_sumlm$rep)
+p <- ggplot(data=b_tpc1, aes(x=day, y=log(Actual.Cell.count), col=c(Treatment)))+
+  geom_point()+
+  geom_line(aes(group=temp_rep))+
+  facet_wrap(~Treatment)
+p+geom_abline(slope=b_tpc1_sumlm$sl, intercept=b_tpc1_sumlm$int, col=c(b_tpc1_sumlm$temp))+facet_wrap(~b_tpc1_sumlm$temp)
+
+
+ggplot(data=d_tpc1, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc1_sum <- getslopes(b_tpc1)
+d_tpc1_sum <- getslopes(d_tpc1)
+
+b_tpc1_sumlm <- getslopeslm(b_tpc1)
+d_tpc1_sumlm <- getslopeslm(d_tpc1)
+
+#####cut to exponential phase - 1b) cut off points clearly decreased at end####
+#'get rid of last 3 points
+b_tpc1b <- b_tpc[b_tpc$day<14,]
+d_tpc1b <- d_tpc[d_tpc$day<14,]
+
+#check growth curves
+ggplot(data=b_tpc1b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc1b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc1b_sumlm <- getslopeslm(b_tpc1b)
+d_tpc1b_sumlm <- getslopeslm(d_tpc1b)
+
+#if cut to first 10 is it different?
+b_tpc1b10 <- b_tpc[b_tpc$day<10.5,]
+d_tpc1b10 <- d_tpc[d_tpc$day<10.5,]
+
+b_tpc1b10_sumlm <- getslopeslm(b_tpc1b10)
+d_tpc1b10_sumlm <- getslopeslm(d_tpc1b10)
+
+#compare to each other and full
+ggplot(data=b_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  geom_vline(xintercept=10.5, linetype="dotted")+
+  geom_vline(xintercept=13.5, linetype="dotted")+
+  facet_wrap(~Treatment)+
+  labs(x = 'Day',
+       y = 'log(Actual Cell Count)',
+       title = 'ProB')
+
+ggplot(data=d_tpc, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  geom_vline(xintercept=10.5, linetype="dotted")+
+  geom_vline(xintercept=13.5, linetype="dotted")+
+  facet_wrap(~Treatment)+
+  labs(x = 'Day',
+       y = 'log(Actual Cell Count)',
+       title = 'ProD')
+
+b_compare <- merge(b_tpc1b_sumlm, b_tpc1b10_sumlm, by=c("temp","rep"))
+b_comp <- merge(b_compare, b_tpc_sumlm, by=c("temp","rep"))
+names(b_comp) = c("temp","rep","int1b","sl1b","int1b10","sl1b10","int","sl")
+plot(b_comp$sl~jitter(b_comp$temp,2), pch=16, col=1, ylim=c(-0.2,0.8), main="ProB")
+points(b_comp$sl1b~jitter(b_comp$temp,2), pch=16, col=2)
+points(b_comp$sl1b10~jitter(b_comp$temp,2), pch=16, col=3)
+
+d_compare <- merge(d_tpc1b_sumlm, d_tpc1b10_sumlm, by=c("temp","rep"))
+d_comp <- merge(d_compare, d_tpc_sumlm, by=c("temp","rep"))
+names(d_comp) = c("temp","rep","int1b","sl1b","int1b10","sl1b10","int","sl")
+plot(d_comp$sl~jitter(d_comp$temp,2), pch=16, col=1, ylim=c(-0.2,0.8), main="ProD")
+points(d_comp$sl1b~jitter(d_comp$temp,2), pch=16, col=2)
+points(d_comp$sl1b10~jitter(d_comp$temp,2), pch=16, col=3)
+
+
+
+#####cut to exponential phase - 2) also cut off weird measurements####
+#'get rid of:
+#'b - 18 - 11 - R3
+#'b - 27 - 11 - R3
+#'b-29-15-all
+#'b-30-5-R1
+#'d-15-7-all
+#'d-20-7-R1
+#'d-30-7-R1
+
+b_tpc2 <- b_tpc1[-which(b_tpc1$Treatment==18&b_tpc1$day==11&b_tpc1$Rep.ID=="R3"|b_tpc1$Treatment==27&b_tpc1$day==11&b_tpc1$Rep.ID=="R3"|b_tpc1$Treatment==29&b_tpc1$day==15|b_tpc1$Treatment==30&b_tpc1$day==5&b_tpc1$Rep.ID=="R1"),]
+d_tpc2 <- d_tpc1[-which(d_tpc1$Treatment==15&d_tpc1$day==7|d_tpc1$Treatment==20&d_tpc1$day==7&d_tpc1$Rep.ID=="R1"|d_tpc1$Treatment==30&d_tpc1$day==7&d_tpc1$Rep.ID=="R1"),]
+
+#check growth curves
+ggplot(data=b_tpc2, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc2, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc2_sum <- getslopes(b_tpc2)
+d_tpc2_sum <- getslopes(d_tpc2)
+
+b_tpc2_sumlm <- getslopeslm(b_tpc2)
+d_tpc2_sumlm <- getslopeslm(d_tpc2)
+
+#####cut to exponential phase - 3) trim ends - only days 5-11 a) with other mods####
+b_tpc3a <- b_tpc2[-which(b_tpc2$day<5|b_tpc2$day>11),]
+d_tpc3a <- d_tpc2[-which(d_tpc2$day<5|d_tpc2$day>11),]
+
+#check growth curves
+ggplot(data=b_tpc3a, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc3a, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc3a_sum <- getslopes(b_tpc3a)
+d_tpc3a_sum <- getslopes(d_tpc3a)
+
+b_tpc3a_sumlm <- getslopeslm(b_tpc3a)
+d_tpc3a_sumlm <- getslopeslm(d_tpc3a)
+
+#####cut to exponential phase - 3) trim ends - only days 5-11 b) without other mods####
+b_tpc3b <- b_tpc[-which(b_tpc$day<5|b_tpc$day>11),]
+d_tpc3b <- d_tpc[-which(d_tpc$day<5|d_tpc$day>11),]
+
+#check growth curves
+ggplot(data=b_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+ggplot(data=d_tpc3b, aes(x=day, y=log(Actual.Cell.count), col=Rep.ID))+
+  geom_point()+
+  geom_line(aes(group=Rep.ID))+
+  facet_wrap(~Treatment)
+
+#do linear regression to get data
+b_tpc3b_sum <- getslopes(b_tpc3b)
+d_tpc3b_sum <- getslopes(d_tpc3b)
+
+b_tpc3b_sumlm <- getslopeslm(b_tpc3b)
+d_tpc3b_sumlm <- getslopeslm(d_tpc3b)
+
+#####!!DOESNT WORK>???? cut to exponential phase - 4) try to automatically detect linear portion####
+par(mfrow=c(3,3), mar=c(1,1,1,1))
+temp <- c()
+rep <- c()
+sl <- c()
+int <- c()
+for (i in unique(b_tpc$Treatment)){
+  for (j in unique(b_tpc$Rep.ID)){
+    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    mod <- lm(y~x, dat)
+    while(summary(mod)$r.squared < 0.95){
+      dat <- dat[-order(abs(mod$residuals), decreasing=TRUE)[1],]
+      mod <- lm(y~x, dat)
+    }
+    plot(y~x, data=dat, ylim=c(6,20), xlim=c(0,18))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, mod$coefficients[2])
+    int <- c(int, mod$coefficients[1])
+  }
+}
+
+#put data in dataframe
+b_tpc4_sum <- data.frame(temp, rep, sl, int)
+
+#d
+par(mfrow=c(3,3), mar=c(1,1,1,1))
+temp <- c()
+rep <- c()
+sl <- c()
+int <- c()
+for (i in unique(d_tpc$Treatment)){
+  for (j in unique(d_tpc$Rep.ID)){
+    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    mod <- lm(y~x, dat)
+    while(summary(mod)$r.squared < 0.95){
+      dat <- dat[-order(abs(mod$residuals), decreasing=TRUE)[1],]
+      mod <- lm(y~x, dat)
+    }
+    plot(y~x, data=dat, ylim=c(6,20), xlim=c(0,18))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, mod$coefficients[2])
+    int <- c(int, mod$coefficients[1])
+  }
+}
+
+#put data in dataframe
+d_tpc4_sum <- data.frame(temp, rep, sl, int)
+
+#####cut to exponential phase - 5) try max gr a) use code from PhD####
+#functions needed
+nderiv <- function(fit, x, eps=1e-5)
+  (predict(fit, x + eps) - predict(fit, x - eps))/(2 * eps)
+
+spline.slope <- function(x, y, n, eps=1e-5)
+  max(nderiv(loess(log(y) ~ x, degree=1, span=0.2),
+             seq(min(x), max(x), length=n)), na.rm=TRUE)
+#d
+temp <- c()
+rep <- c()
+sl <- c()
+for (i in unique(d_tpc$Treatment)){
+  for (j in unique(d_tpc$Rep.ID)){
+    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
+    k <- spline.slope(sub$day, sub$Actual.Cell.count, length(sub$File.ID))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, k)
+  }
+}
+
+#put data in dataframe
+d_tpc5a_sum <- data.frame(temp, rep, sl)
+
+#b
+temp <- c()
+rep <- c()
+sl <- c()
+for (i in unique(b_tpc$Treatment)){
+  for (j in unique(b_tpc$Rep.ID)){
+    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
+    k <- spline.slope(sub$day, sub$Actual.Cell.count, length(sub$File.ID))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+    sl <- c(sl, k)
+  }
+}
+
+#put data in dataframe
+b_tpc5a_sum <- data.frame(temp, rep, sl)
+
+#!!!!many warnings
+#!!!didn't work for d at all
+
+#####cut to exponential phase - 5) try max gr b) lm 3 pts with R2 > 0.95####
+#d
+temp <- c()
+rep <- c()
+maxsl <- c()
+for (i in unique(d_tpc$Treatment)){
+  for (j in unique(d_tpc$Rep.ID)){
+    sub <- subset(d_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    sl<-c()
+    for (k in 1:(length(dat$x)-2)){
+      mod <- lm(y[k:(k+2)]~x[k:(k+2)], dat)
+      if(summary(mod)$r.squared > 0.95){
+        sl <- c(sl, mod$coefficients[2])}
+    }
+    maxsl <- c(maxsl,max(sl))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+  }
+}
+
+#put data in dataframe
+d_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
+
+#b
+temp <- c()
+rep <- c()
+maxsl <- c()
+for (i in unique(b_tpc$Treatment)){
+  for (j in unique(b_tpc$Rep.ID)){
+    sub <- subset(b_tpc, Treatment==i&Rep.ID==j)
+    dat <- data.frame(x=sub$day, y=log(sub$Actual.Cell.count))
+    sl<-c()
+    for (k in 1:(length(dat$x)-2)){
+      mod <- lm(y[k:(k+2)]~x[k:(k+2)], dat)
+      if(summary(mod)$r.squared > 0.95){
+        sl <- c(sl, mod$coefficients[2])}
+    }
+    maxsl <- c(maxsl,max(sl))
+    temp <- c(temp, i)
+    rep <- c(rep, j)
+  }
+}
+
+#put data in dataframe
+b_tpc5b_sum <- data.frame(temp, rep, sl=maxsl)
+
+#####compare slopes#######
+#compare slopes
+plot(b_tpc_sum$sl~jitter(b_tpc_sum$temp,2), ylim=c(0,2))
+points(b_tpc_sumlm$sl~jitter(b_tpc_sumlm$temp,2), col="grey")
+points(b_tpc1_sum$sl~jitter(b_tpc1_sum$temp,2), col="blue")
+points(b_tpc1_sumlm$sl~jitter(b_tpc1_sumlm$temp,2), col="darkblue")
+points(b_tpc2_sum$sl~jitter(b_tpc2_sum$temp,2), col="red")
+points(b_tpc2_sumlm$sl~jitter(b_tpc2_sumlm$temp,2), col="darkred")
+points(b_tpc3a_sum$sl~jitter(b_tpc3a_sum$temp,2), col="violet")
+points(b_tpc3a_sumlm$sl~jitter(b_tpc3a_sumlm$temp,2), col="purple")
+points(b_tpc3b_sum$sl~jitter(b_tpc3b_sum$temp,2), col="green")
+points(b_tpc3b_sumlm$sl~jitter(b_tpc3b_sumlm$temp,2), col="darkgreen")
+points(b_tpc4_sum$sl~jitter(b_tpc4_sum$temp,2), col="orange", pch=16)
+points(b_tpc5a_sum$sl~jitter(b_tpc5a_sum$temp,2), col="lightblue", pch=16)
+points(b_tpc5b_sum$sl~jitter(b_tpc5b_sum$temp,2), col="yellow", pch=16)
+points(b_gr_roll6$sl~jitter(b_gr_roll6$temp,2), col="pink", pch=18)
+points(b_tpc7a_sum$sl~jitter(b_tpc7a_sum$temp,2), col="cyan", pch=18)
+points(b_tpc7b_sum$sl~jitter(b_tpc7b_sum$temp,2), col="magenta", pch=18)
+points(b_tpc7b05_sum$sl~jitter(b_tpc7b05_sum$temp,2), col="brown", pch=18)
+#'similar by eye except light blue
+#'some points for pink, magenta quite different (because didn't trim data?)
+
+plot(d_tpc_sum$sl~jitter(d_tpc_sum$temp,2), ylim=c(0,1))
+points(d_tpc_sumlm$sl~jitter(d_tpc_sumlm$temp,2), col="grey")
+points(d_tpc1_sum$sl~jitter(d_tpc1_sum$temp,2), col="blue")
+points(d_tpc1_sumlm$sl~jitter(d_tpc1_sumlm$temp,2), col="darkblue")
+points(d_tpc2_sum$sl~jitter(d_tpc2_sum$temp,2), col="red")
+points(d_tpc2_sumlm$sl~jitter(d_tpc2_sumlm$temp,2), col="darkred")
+points(d_tpc3a_sum$sl~jitter(d_tpc3a_sum$temp,2), col="violet")
+points(d_tpc3a_sumlm$sl~jitter(d_tpc3a_sumlm$temp,2), col="purple")
+points(d_tpc3b_sum$sl~jitter(d_tpc3b_sum$temp,2), col="green")
+points(d_tpc3b_sumlm$sl~jitter(d_tpc3b_sumlm$temp,2), col="darkgreen")
+points(d_tpc4_sum$sl~jitter(d_tpc4_sum$temp,2), col="orange", pch=16)
+points(d_tpc5a_sum$sl~jitter(d_tpc5a_sum$temp,2), col="lightblue", pch=16)
+points(d_tpc5b_sum$sl~jitter(d_tpc5b_sum$temp,2), col="yellow", pch=16)
+points(d_gr_roll6$sl~jitter(d_gr_roll6$temp,2), col="pink", pch=18)
+points(d_tpc7a_sum$sl~jitter(d_tpc7a_sum$temp,2), col="cyan", pch=18)
+points(d_tpc7b_sum$sl~jitter(d_tpc7b_sum$temp,2), col="magenta", pch=18)
+points(d_tpc7b05_sum$sl~jitter(d_tpc7b05_sum$temp,2), col="brown", pch=18)
+#pretty similar by eye except light blue and yellow
+#'light blue very wrong
+#'yellow, pink, magenta (although magenta even higher)  much higher for higher ones
+#'black and grey lower for higher growing ones
+
+#######fit tpcs - b ########
+#'all data sources for b:
+data_b <- list("lmer" = b_tpc_sum,"lm" = b_tpc_sumlm, "lmer1"=b_tpc1_sum, "lm1"=b_tpc1_sumlm, "lmer2"=b_tpc2_sum,"lm2"=b_tpc2_sumlm, "lmer3a"=b_tpc3a_sum,"lm3a"=b_tpc3a_sumlm,"lmer3b"=b_tpc3b_sum,"lm3b"=b_tpc3b_sumlm,"gr4"=b_tpc4_sum,"gr5a"=b_tpc5a_sum, "gr5b"=b_tpc5b_sum, "gr6"=b_gr_roll6, "gr7a"=b_tpc7a_sum, "gr7b"=b_tpc7b_sum, "gr7b05"=b_tpc7b05_sum)
