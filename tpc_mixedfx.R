@@ -137,98 +137,120 @@ tpc10_sum$CenteredTemp <- as.numeric(tpc10_sum$CenteredTemp)
 
 # group the data
 df_grp <- groupedData(sl ~ temp | rep, data = tpc_sum)
-#df_grp <- groupedData(sl ~ CenteredTemp | rep, data = tpc_sum)
+df_grp <- groupedData(sl ~ CenteredTemp | rep, data = tpc_sum)
 df_grp13 <- groupedData(sl ~ temp | rep, data = tpc13_sum)
 df_grp10 <- groupedData(sl ~ temp | rep, data = tpc10_sum)
 
-#########fit full models - gnls - only those with topt#########
+#########fit models - gnls - use simplest - gaussian_1987#########
 # fit the model - with gnls cuz no random effects
 
-#modifiedgaussian_2006
-get_start_vals(df_grp$temp, df_grp$sl, model_name = "modifiedgaussian_2006")
-#   rmax       topt          a          b
-#0.5860897 25.0000000  7.5000000  2.0000000
-gau06_gnls <- gnls(sl ~ modifiedgaussian_2006(temp = temp, rmax, topt, a, b),
+#gaussian_1987
+get_start_vals(df_grp$temp, df_grp$sl, model_name = "gaussian_1987")
+# rmax       topt          a
+#0.5860897 25.0000000 15.0000000
+gau_gnls <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
                    data = df_grp,
-                   params = list(rmax + topt + a + b ~ 1 + strain),
+                   params = list(rmax + topt + a ~ strain),
                    # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
-                   start = c(0.5860897, rep(0, 1), 25, rep(0, 1), 7.5, rep(0, 1), 2, rep(0,1)),
+                   start = c(0.5860897, rep(0, 1), 25, rep(0, 1), 15, rep(0, 1)),
                    na.action = na.omit)
-#Error in gnls(sl ~ modifiedgaussian_2006(temp = temp, rmax, topt, a, b),  :
+#Error in gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a), data = df_grp,  :
 #step halving factor reduced below minimum in NLS step
 
-get_start_vals(df_grp13$temp, df_grp13$sl, model_name = "modifiedgaussian_2006")
-#   rmax       topt          a          b
-#0.6228499 25.0000000  7.5000000  2.0000000
-gau06_gnls13 <- gnls(sl ~ modifiedgaussian_2006(temp = temp, rmax, topt, a, b),
-                   data = df_grp13,
-                   params = list(rmax + topt + a + b ~ 1 + strain),
+
+get_start_vals(df_grp13$temp, df_grp13$sl, model_name = "gaussian_1987")
+# rmax       topt          a
+#0.6228499 25.0000000 15.0000000
+gau_gnls13 <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
+                 data = df_grp13,
+                 params = list(rmax + topt + a ~ strain),
+                 # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
+                 start = c(0.6228499, rep(0, 1), 25, rep(0, 1), 15, rep(0, 1)),
+                 na.action = na.omit)
+
+
+get_start_vals(df_grp10$temp, df_grp10$sl, model_name = "gaussian_1987")
+# rmax       topt          a
+#0.6582842 25.0000000 15.0000000
+gau_gnls10 <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
+                   data = df_grp10,
+                   params = list(rmax + topt + a ~ strain),
                    # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
-                   start = c(0.6228499, rep(0, 1), 25, rep(0, 1), 7.5, rep(0, 1), 2, rep(0,1)),
+                   start = c(0.6582842, rep(0, 1), 25, rep(0, 1), 15, rep(0, 1)),
                    na.action = na.omit)
-######left off here - not working#########
+
+#with CenteredTemp
+get_start_vals(df_grp$CenteredTemp, df_grp$sl, model_name = "gaussian_1987")
+# rmax       topt          a
+#0.5860897  3.0000000 15.0000000
+gau_gnlsC <- gnls(sl ~ gaussian_1987(temp = CenteredTemp, rmax, topt, a),
+                 data = df_grp,
+                 params = list(rmax + topt + a ~ strain),
+                 # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
+                 start = c(0.5860897, rep(0, 1), 3, rep(0, 1), 15, rep(0, 1)),
+                 na.action = na.omit)
+#Error in gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a), data = df_grp,  :
+#step halving factor reduced below minimum in NLS step
 
 
+get_start_vals(df_grp13$CenteredTemp, df_grp13$sl, model_name = "gaussian_1987")
+# rmax       topt          a
+#0.6228499  3.0000000 15.0000000
+gau_gnlsC13 <- gnls(sl ~ gaussian_1987(temp = CenteredTemp, rmax, topt, a),
+                   data = df_grp13,
+                   params = list(rmax + topt + a ~ strain),
+                   # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
+                   start = c(0.6228499, rep(0, 1), 3, rep(0, 1), 15, rep(0, 1)),
+                   na.action = na.omit)
 
 
+get_start_vals(df_grp10$CenteredTemp, df_grp10$sl, model_name = "gaussian_1987")
+# rmax       topt          a
+#0.6582842  3.0000000 15.0000000
+gau_gnlsC10 <- gnls(sl ~ gaussian_1987(temp = CenteredTemp, rmax, topt, a),
+                   data = df_grp10,
+                   params = list(rmax + topt + a ~ strain),
+                   # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
+                   start = c(0.6582842, rep(0, 1), 3, rep(0, 1), 15, rep(0, 1)),
+                   na.action = na.omit)
 
+anova(gau_gnls13, gau_gnls10, gau_gnlsC13, gau_gnlsC10)
+#centered temp same as not, use not
 
-
-
-
-########here###########
-
-
-
-# check the best model fit and check each combination of random effects (update updates the model above without having to write it all out)
-gaus_nlme2 <- update(gaus_nlme, random = pdDiag(rmax + topt ~ 1))
-gaus_nlme3 <- update(gaus_nlme, random = pdDiag(rmax + a ~ 1))
-gaus_nlme4 <- update(gaus_nlme, random = pdDiag(topt + a ~ 1))
-gaus_nlme5 <- update(gaus_nlme, random = pdDiag(topt ~ 1))
-gaus_nlme6 <- update(gaus_nlme, random = pdDiag(rmax ~ 1))
-gaus_nlme7 <- update(gaus_nlme, random = pdDiag(a ~ 1))
-
-gaus_gnls <- gnls(sl ~ gaussian_1987(temp = temp, rmax, topt, a),
-                    data = df_grp,
-                    params = list(rmax + topt + a ~ 1 + strain),
-                    #fixed = list(rmax + topt + a ~ 1),
-                    #random = pdDiag(rmax + topt + a ~ 1),
-                    # start tells the model roughly where to start based on values in the data and the 3 represents the number of variables it will fit the model to not including the control (three other stressor combinations)
-                    start = c(0.6228499, rep(0, 1), 25, rep(0, 1), 15, rep(0, 1)),
-                    na.action = na.omit)
-summary(gaus_gnls)
-
-
-# Do ANOVA style analysis to get AIC and p values on which model fits best
-anova(gaus_nlme,gaus_nlme2,gaus_nlme3,gaus_nlme4,gaus_nlme5,gaus_nlme6,gaus_nlme7,gaus_gnls)
-# all pretty much the same. No random effects slightly better AIC.
-
+##############drop each parameter singly###########
 
 # remove treatment effect on rmax (max rate at optimum)
-#gaus_nlme2<- update(gaus_nlme, fixed = list(rmax ~ 1, topt + a ~ 1 + strain), start = c(0.6228499, 25, rep(0, 1), 15, rep(0, 1)))
-gaus_gnls2<- update(gaus_gnls, params = list(rmax ~ 1, topt + a ~ 1 + strain), start = c(0.6228499, 25, rep(0, 1), 15, rep(0, 1)))
+gau_gnls13_2<- update(gau_gnls13, params = list(rmax ~ 1, topt + a ~ strain), start = c(0.6228499, 25, rep(0, 1), 15, rep(0, 1)))
+gau_gnls10_2<- update(gau_gnls10, params = list(rmax ~ 1, topt + a ~ strain), start = c(0.6582842, 25, rep(0, 1), 15, rep(0, 1)))
 
 # remove treatment effect on topt
-gaus_nlme3<- update(gaus_nlme, fixed = list(topt ~ 1, rmax + a ~ 1 + strain), start = c(25, 0.6228499, rep(0,1), 15, rep(0, 1)))
-gaus_gnls3<- update(gaus_gnls, params = list(topt ~ 1, rmax + a ~ 1 + strain), start = c(25, 0.6228499,rep(0,1), 15, rep(0, 1)))
+gau_gnls13_3<- update(gau_gnls13, params = list(topt ~ 1, rmax + a ~ strain), start = c(25, 0.6228499, rep(0, 1), 15, rep(0, 1)))
+gau_gnls10_3<- update(gau_gnls10, params = list(topt ~ 1, rmax + a ~ strain), start = c(25, 0.6582842, rep(0, 1), 15, rep(0, 1)))
 
 # remove treatment effect on a (width)
-gaus_nlme4<- update(gaus_nlme, fixed = list(rmax + topt ~ 1+strain, a ~ 1), start = c(0.6228499, rep(0,1), 25, rep(0, 1), 15))
-gaus_gnls4<- update(gaus_gnls, params = list(rmax + topt ~ 1+strain, a ~ 1), start = c(0.6228499, rep(0,1), 25, rep(0, 1), 15))
+gau_gnls13_4<- update(gau_gnls13, params = list(rmax + topt ~ strain, a ~ 1), start = c(0.6228499, rep(0, 1), 25, rep(0, 1), 15))
+gau_gnls10_4<- update(gau_gnls10, params = list(rmax + topt ~ strain, a ~ 1), start = c(0.6582842, rep(0, 1), 25, rep(0, 1), 15))
 
-anova(gaus_nlme, gaus_nlme3, gaus_nlme4, gaus_gnls, gaus_gnls2, gaus_gnls3, gaus_gnls4)
-anova(gaus_nlme, gaus_nlme4, gaus_gnls, gaus_gnls4)
-#quite similar with or without treatment effect on a and with or without random effects. no random and remove treatment effect on a lowest AIC but not significant
-#notably, removing treatment effect on topt (model3) sig worse than full model
-anova(gaus_nlme, gaus_nlme3, gaus_gnls, gaus_gnls3)
-#notably, removing treatment effect on rmax (model2) sig worse than full model
-anova(gaus_gnls, gaus_gnls2)
+anova(gau_gnls13, gau_gnls13_2)
+#dropping rmax sig worse
+anova(gau_gnls13, gau_gnls13_3)
+#dropping topt sig worse
+anova(gau_gnls13, gau_gnls13_4)
+#dropping a about the same, slightly better
 
+anova(gau_gnls10, gau_gnls10_2)
+#dropping rmax sig worse
+anova(gau_gnls10, gau_gnls10_3)
+#dropping topt sig worse
+anova(gau_gnls10, gau_gnls10_4)
+#dropping a about the same, slightly better
 
+##############drop pairs of parameters###########
 # remove treatment effect on rmax (max rate at optimum) and topt
-#gaus_nlme5<- update(gaus_nlme, fixed = list(rmax +topt ~ 1, a ~ 1 + strain), start = c(0.6228499, 25, 15, rep(0, 1)))
-gaus_gnls5<- update(gaus_gnls, params = list(rmax +topt ~ 1, a ~ 1 + strain), start = c(0.6228499, 25, 15, rep(0, 1)))
+gau_gnls13_5<- update(gau_gnls13, params = list(rmax + topt ~ 1, a ~ strain), start = c(0.6228499, 25, 15, rep(0, 1)))
+gau_gnls10_5<- update(gau_gnls10, params = list(rmax + topt ~ 1, a ~ strain), start = c(0.6582842, 25, 15, rep(0, 1)))
 
+###########here###########
 # remove treatment effect on topt and a
 #gaus_nlme6<- update(gaus_nlme, fixed = list(topt +a ~ 1, rmax ~ 1 + strain), start = c(25, 15, 0.6228499, rep(0,1)))
 gaus_gnls6<- update(gaus_gnls, params = list(topt +a~ 1, rmax ~ 1 + strain), start = c(25, 15, 0.6228499,rep(0,1)))
