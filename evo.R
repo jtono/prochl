@@ -114,100 +114,6 @@ ggplot(d_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) +
 #they have a big dip as well - day 118 = 2022-03-31 - same date
 #seems to affect next points as well - related to covid gap? maybe stationary phase and took awhile to recover?
 
-###try to find overall lines of best fit
-#b - b_evo_nona
-#subset by Treatment - 23
-b_subt23 <- subset(b_evo_nona, Treatment==23)
-#make version where remove weird points
-b_subt23.rm <- b_subt23[-which(b_subt23$day==125),]
-b_subt23.rm <- b_subt23.rm[-which(b_subt23.rm$day==131),]
-b_subt23.rm <- b_subt23.rm[-which(b_subt23.rm$day==138),]
-#fit a linear model
-fit1 <- lm(gr~day, data=b_subt23)
-fit1.rm <- lm(gr~day, data=b_subt23.rm)
-#look at the fits
-plot(b_subt23$day, b_subt23$gr, pch=19, col="red")
-points(b_subt23.rm$day, b_subt23.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-title(main="ProB at 23")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
-
-#subset by Treatment - 29
-b_subt29 <- subset(b_evo_nona, Treatment==29)
-#make version where remove weird points
-b_subt29.rm <- b_subt29[-which(b_subt29$day==125),]
-b_subt29.rm <- b_subt29.rm[-which(b_subt29.rm$day==131),]
-b_subt29.rm <- b_subt29.rm[-which(b_subt29.rm$day==138),]
-#fit a linear model
-fit1 <- lm(gr~day, data=b_subt29)
-fit1.rm <- lm(gr~day, data=b_subt29.rm)
-#look at the fits
-plot(b_subt29$day, b_subt29$gr, pch=19, col="red")
-points(b_subt29.rm$day, b_subt29.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-title(main="ProB at 29")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
-
-#d - d_evo_nona
-#subset by Treatment - 23
-d_subt23 <- subset(d_evo_nona, Treatment==23)
-#make version where remove weird points
-d_subt23.rm <- d_subt23[-which(d_subt23$day==118),]
-d_subt23.rm <- d_subt23.rm[-which(d_subt23.rm$day==124),]
-d_subt23.rm <- d_subt23.rm[-which(d_subt23.rm$day==131),]
-#fit a linear model
-fit1 <- lm(gr~day, data=d_subt23)
-fit1.rm <- lm(gr~day, data=d_subt23.rm)
-#look at the fits
-plot(d_subt23$day, d_subt23$gr, pch=19, col="red")
-points(d_subt23.rm$day, d_subt23.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-title(main="ProD at 23")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
-
-#subset by Treatment - 27
-d_subt27 <- subset(d_evo_nona, Treatment==27)
-#make version where remove weird points
-d_subt27.rm <- d_subt27[-which(d_subt27$day==118),]
-d_subt27.rm <- d_subt27.rm[-which(d_subt27.rm$day==124),]
-d_subt27.rm <- d_subt27.rm[-which(d_subt27.rm$day==131),]
-#fit a linear model
-fit1 <- lm(gr~day, data=d_subt27)
-fit1.rm <- lm(gr~day, data=d_subt27.rm)
-#look at the fits
-plot(d_subt27$day, d_subt27$gr, pch=19, col="red")
-points(d_subt27.rm$day, d_subt27.rm$gr, pch=19, col="black")
-x_axis <- seq(0,175,length=100)
-lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
-lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
-title(main="ProD at 27")
-
-#find values
-summary(fit1)$adj.r.squared
-fit1$coefficients
-summary(fit1.rm)$adj.r.squared
-fit1.rm$coefficients
 
 #####mixed effects models - b #####
 #b - b_evo_nona
@@ -300,7 +206,7 @@ aic_comp_b[15,]
 anov_comp_b <- anova(b_rm,b_rmI,b_rm0,b_rm_AR1,b_rmI_AR1,b_rmI_AR1b,b_rmI_AR1c,b_rm0_AR1,b_rm0_AR1a,b_rm0_AR1c,b_rm_ARMA,b_rmI_ARMA,b_rmI_ARMAb,b_rmI_ARMAc,b_rm0_ARMA,b_rm0_ARMAa,b_rm0_ARMAc,b_rm_CAR1,b_rm_CAR1b,b_rm_CAR1c,b_rmI_CAR1,b_rmI_CAR1b,b_rmI_CAR1c,b_rm0_CAR1,b_rm0_CAR1a,b_rm0_CAR1c,b_rmI_CompSymm,b_rmI_CompSymmb,b_rmI_CompSymmc,b_rm0_CompSymm,b_rm0_CompSymma,b_rm0_CompSymmb,b_rm0_CompSymmc, test=TRUE)
 
 #save anova table output
-save_as_docx(flextable(anov_comp_b),path="tables/tableSup1_b.docx")
+#save_as_docx(flextable(anov_comp_b),path="tables/tableSup1_b.docx")
 
 which(anov_comp_b$logLik==max(anov_comp_b$logLik))
 anov_comp_b[15,]
@@ -356,6 +262,8 @@ visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab
   scale_color_manual(values=c("blue","red")) +
   scale_fill_manual(values=c("blue","red")) +
   labs(title="ProB")
+
+#######here - b, only done for points removed########
 
 #####mixed effects models - d#####
 #d - d_evo_nona
@@ -816,3 +724,98 @@ fit1.rm <- lm(gr~day, data=b_subt23.rm)
 
 
 
+########old##########
+###try to find overall lines of best fit#######
+#b - b_evo_nona
+#subset by Treatment - 23
+b_subt23 <- subset(b_evo_nona, Treatment==23)
+#make version where remove weird points
+b_subt23.rm <- b_subt23[-which(b_subt23$day==125),]
+b_subt23.rm <- b_subt23.rm[-which(b_subt23.rm$day==131),]
+b_subt23.rm <- b_subt23.rm[-which(b_subt23.rm$day==138),]
+#fit a linear model
+fit1 <- lm(gr~day, data=b_subt23)
+fit1.rm <- lm(gr~day, data=b_subt23.rm)
+#look at the fits
+plot(b_subt23$day, b_subt23$gr, pch=19, col="red")
+points(b_subt23.rm$day, b_subt23.rm$gr, pch=19, col="black")
+x_axis <- seq(0,175,length=100)
+lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
+lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProB at 23")
+
+#find values
+summary(fit1)$adj.r.squared
+fit1$coefficients
+summary(fit1.rm)$adj.r.squared
+fit1.rm$coefficients
+
+#subset by Treatment - 29
+b_subt29 <- subset(b_evo_nona, Treatment==29)
+#make version where remove weird points
+b_subt29.rm <- b_subt29[-which(b_subt29$day==125),]
+b_subt29.rm <- b_subt29.rm[-which(b_subt29.rm$day==131),]
+b_subt29.rm <- b_subt29.rm[-which(b_subt29.rm$day==138),]
+#fit a linear model
+fit1 <- lm(gr~day, data=b_subt29)
+fit1.rm <- lm(gr~day, data=b_subt29.rm)
+#look at the fits
+plot(b_subt29$day, b_subt29$gr, pch=19, col="red")
+points(b_subt29.rm$day, b_subt29.rm$gr, pch=19, col="black")
+x_axis <- seq(0,175,length=100)
+lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
+lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProB at 29")
+
+#find values
+summary(fit1)$adj.r.squared
+fit1$coefficients
+summary(fit1.rm)$adj.r.squared
+fit1.rm$coefficients
+
+#d - d_evo_nona
+#subset by Treatment - 23
+d_subt23 <- subset(d_evo_nona, Treatment==23)
+#make version where remove weird points
+d_subt23.rm <- d_subt23[-which(d_subt23$day==118),]
+d_subt23.rm <- d_subt23.rm[-which(d_subt23.rm$day==124),]
+d_subt23.rm <- d_subt23.rm[-which(d_subt23.rm$day==131),]
+#fit a linear model
+fit1 <- lm(gr~day, data=d_subt23)
+fit1.rm <- lm(gr~day, data=d_subt23.rm)
+#look at the fits
+plot(d_subt23$day, d_subt23$gr, pch=19, col="red")
+points(d_subt23.rm$day, d_subt23.rm$gr, pch=19, col="black")
+x_axis <- seq(0,175,length=100)
+lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
+lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProD at 23")
+
+#find values
+summary(fit1)$adj.r.squared
+fit1$coefficients
+summary(fit1.rm)$adj.r.squared
+fit1.rm$coefficients
+
+#subset by Treatment - 27
+d_subt27 <- subset(d_evo_nona, Treatment==27)
+#make version where remove weird points
+d_subt27.rm <- d_subt27[-which(d_subt27$day==118),]
+d_subt27.rm <- d_subt27.rm[-which(d_subt27.rm$day==124),]
+d_subt27.rm <- d_subt27.rm[-which(d_subt27.rm$day==131),]
+#fit a linear model
+fit1 <- lm(gr~day, data=d_subt27)
+fit1.rm <- lm(gr~day, data=d_subt27.rm)
+#look at the fits
+plot(d_subt27$day, d_subt27$gr, pch=19, col="red")
+points(d_subt27.rm$day, d_subt27.rm$gr, pch=19, col="black")
+x_axis <- seq(0,175,length=100)
+lines(x_axis, predict(fit1, data.frame(day=x_axis)), col="red")
+lines(x_axis, predict(fit1.rm, data.frame(day=x_axis)), col="black")
+title(main="ProD at 27")
+
+#find values
+summary(fit1)$adj.r.squared
+fit1$coefficients
+summary(fit1.rm)$adj.r.squared
+fit1.rm$coefficients
