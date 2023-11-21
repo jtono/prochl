@@ -99,7 +99,10 @@ ggplot(b_evo, aes(x=day, y=gr, col=as.factor(Treatment))) +
 #plot b with removing nas
 ggplot(b_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) +
   geom_line(aes(group=Rep))+
-  geom_point()
+  geom_point()+
+  labs(x = 'Day',
+       y = 'Growth rate',
+       title = 'ProB')
 #mostly ok but huge dip at one timepoint - day 125 = 2022-03-31
 
 #plot d without removing nas
@@ -110,7 +113,10 @@ ggplot(d_evo, aes(x=day, y=gr, col=as.factor(Treatment))) +
 #plot d with removing nas
 ggplot(d_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) +
   geom_line(aes(group=Rep))+
-  geom_point()
+  geom_point()+
+  labs(x = 'Day',
+       y = 'Growth rate',
+       title = 'ProD')
 #they have a big dip as well - day 118 = 2022-03-31 - same date
 #seems to affect next points as well - related to covid gap? maybe stationary phase and took awhile to recover?
 
@@ -467,6 +473,29 @@ visreg(d_rm0_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xla
   scale_fill_manual(values=c("blue","red")) +
   labs(title="ProD")
 
+#######show down turn points#####
+head(b_evo_nona)
+d_evo_nona$col <- ""
+d_evo_nona[d_evo_nona$Treatment==23,]$col <- "blue"
+d_evo_nona[d_evo_nona$Treatment==27,]$col <- "red"
+d_evo_rm$col <- ""
+d_evo_rm[d_evo_rm$Treatment==23,]$col <- "blue"
+d_evo_rm[d_evo_rm$Treatment==27,]$col <- "red"
+
+b_evo_nona$col <- ""
+b_evo_nona[b_evo_nona$Treatment==23,]$col <- "blue"
+b_evo_nona[b_evo_nona$Treatment==29,]$col <- "red"
+b_evo_rm$col <- ""
+b_evo_rm[b_evo_rm$Treatment==23,]$col <- "blue"
+b_evo_rm[b_evo_rm$Treatment==29,]$col <- "red"
+
+plot(d_evo_nona$day, d_evo_nona$gr, pch=4, col=d_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="ProD")
+points(d_evo_rm$day, d_evo_rm$gr, pch=19, col=d_evo_rm$col)
+
+plot(b_evo_nona$day, b_evo_nona$gr, pch=4, col=b_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="ProB")
+points(b_evo_rm$day, b_evo_rm$gr, pch=19, col=b_evo_rm$col)
+lines(b_evo_rm$day, b_evo_rm$gr, pch=19, col=b_evo_rm$col)
+
 #########mark one weird replicate in ProD - #R6 27 ###################
 plot(d_evo_nona$day, d_evo_nona$gr, pch=4, col=d_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="ProD")
 points(d_evo_rm$day, d_evo_rm$gr, pch=19, col=d_evo_rm$col)
@@ -662,13 +691,13 @@ anova(d_rm60_AR1)
 anova(d_rm60_ARMA)
 anova(d_rm60_CAR1)
 
-fixef(d_rm_ARMA)
-ranef(d_rm_ARMA)
+fixef(d_rm6_ARMA)
+ranef(d_rm6_ARMA)
 
 
 #plot - could also use , type="contrast"
-visreg(d_rm0_ARMAa, "day", by="Treatment", gg=TRUE, overlay=TRUE)
-visreg(d_rm0_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+visreg(d_rm60_ARMAa, "day", by="Treatment", gg=TRUE, overlay=TRUE)
+visreg(d_rm60_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
   scale_color_manual(values=c("blue","red")) +
   scale_fill_manual(values=c("blue","red")) +
