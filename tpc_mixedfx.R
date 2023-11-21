@@ -137,7 +137,6 @@ tpc10_sum$CenteredTemp <- as.numeric(tpc10_sum$CenteredTemp)
 
 # group the data
 df_grp <- groupedData(sl ~ temp | rep, data = tpc_sum)
-df_grp <- groupedData(sl ~ CenteredTemp | rep, data = tpc_sum)
 df_grp13 <- groupedData(sl ~ temp | rep, data = tpc13_sum)
 df_grp10 <- groupedData(sl ~ temp | rep, data = tpc10_sum)
 
