@@ -315,6 +315,10 @@ topt13 <- as.data.frame(comparisons_topt13)
 newX$topt <- 0
 newX[newX$strain=="ProB",]$topt <- topt13[topt13$strain=="ProB",]$emmean
 newX[newX$strain=="ProD",]$topt <- topt13[topt13$strain=="ProD",]$emmean
+#add in evolved temp
+newX$tevo <- 0
+newX[newX$strain=="ProB",]$tevo <- 29
+newX[newX$strain=="ProD",]$tevo <- 27
 
 # Obtain the predicted values for the new temperature levels
 newX$sl <- predict(gau_gnls_final13, newdata = newX)
@@ -323,8 +327,12 @@ newX$sl <- predict(gau_gnls_final13, newdata = newX)
 tpc_plot13 <-
   ggplot(df_grp13, aes(temp, sl, col=strain)) +
   geom_point() +
-  geom_line(data=newX, size = 2, aes(group=strain, col=strain)) +
-  geom_vline(data = newX, aes(xintercept=topt, col=strain), linetype="dashed")
+  geom_line(data=newX, linewidth = 2, aes(group=strain, col=strain)) +
+  geom_vline(data = newX, aes(xintercept=topt, col=strain), linetype="dashed")+
+  labs(x = 'Temperature (ºC)',
+       y = 'Growth rate') +
+  scale_colour_brewer(palette = "Dark2", name = "Strain", labels = c("MIT9312", "MED4")) +
+  theme_bw()
 tpc_plot13
 
 ################old############
