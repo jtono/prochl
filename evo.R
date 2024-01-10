@@ -4,6 +4,7 @@ library(lmerTest)
 library(visreg)
 library(MetBrewer)
 library("flextable")
+library(ggpubr)
 #####getting data ready#####
 #read in data
 b_evo <- read.csv("Pc_B_Evo.csv", sep=",", as.is=TRUE, header=TRUE)
@@ -280,6 +281,7 @@ visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab
 #d - d_evo_nona
 #make Treatment, Rep into factors
 d_evo_nona$Treatment <- as.factor(d_evo_nona$Treatment)
+d_evo_nona$Treatment2 <- factor(d_evo_nona$Treatment, levels=c(27,23))
 d_evo_nona$Rep <- as.factor(d_evo_nona$Rep)
 #make version where remove weird points - same dates as b
 d_evo_rm <- d_evo_nona[-which(d_evo_nona$day%in%c(118,124,131)),]
@@ -327,6 +329,7 @@ d_rmI_ARMAc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=d_evo_rm, na.actio
 #no random effects and ARMA correlation
 d_rm0_ARMA <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
 d_rm0_ARMAa <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~1|Rep))
+d_rm0_ARMAa2 <- gls(gr ~ day*Treatment2, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~1|Rep))
 #d_rm0_ARMAb <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~day))
 #doesn't work
 d_rm0_ARMAc <- gls(gr ~ day*Treatment, data=d_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1, form=~day|Rep))
@@ -470,14 +473,33 @@ fixef(d_rmI_ARMA)
 ranef(d_rm_ARMA)
 ranef(d_rmI_ARMA)
 
+#where T27 comes first
+summary(d_rm0_ARMAa2)
+
 #plot - could also use , type="contrast"
 visreg(d_rm0_ARMAa, "day", by="Treatment", gg=TRUE, overlay=TRUE)
 visreg(d_rm0_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
-  scale_color_manual(values=c("blue","red")) +
-  scale_fill_manual(values=c("blue","red")) +
-  labs(title="ProD")
+  scale_color_manual(values=c("royalblue1","red4")) +
+  scale_fill_manual(values=c("royalblue1","red4")) +
+  labs(title="MED4")
 
+######plot both######
+######here - make same size and with legend. Also suppress some stuff########
+
+med4 <- visreg(d_rm0_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+  theme_bw() +
+  scale_color_manual(values=c("royalblue1","red4")) +
+  scale_fill_manual(values=c("royalblue1","red4")) +
+  labs(title="MED4")
+
+mit9312 <- visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
+  theme_bw() +
+  scale_color_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
+  scale_fill_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
+  labs(title="MIT9312")
+
+ggarrange(mit9312, med4, ncol=2, nrow=1, legend = "right", common.legend=TRUE)
 #######show down turn points#####
 head(b_evo_nona)
 d_evo_nona$col <- ""
