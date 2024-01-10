@@ -125,6 +125,7 @@ ggplot(d_evo_nona, aes(x=day, y=gr, col=as.factor(Treatment))) +
 #b - b_evo_nona
 #make Treatment, Rep into factors
 b_evo_nona$Treatment <- as.factor(b_evo_nona$Treatment)
+b_evo_nona$Treatment2 <- factor(b_evo_nona$Treatment, levels=c(29,23))
 b_evo_nona$Rep <- as.factor(b_evo_nona$Rep)
 #make version where remove weird points
 b_evo_rm <- b_evo_nona[-which(b_evo_nona$day%in%c(125,131,138)),]
@@ -163,6 +164,7 @@ b_rmI_ARMAc <- lme(gr ~ day*Treatment, random = ~ 1|Rep, data=b_evo_rm, na.actio
 
 #no random effects and ARMA correlation
 b_rm0_ARMA <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
+b_rm0_ARMA2 <- gls(gr ~ day*Treatment2, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1))
 b_rm0_ARMAa <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1,form=~1|Rep))
 b_rm0_ARMAc <- gls(gr ~ day*Treatment, data=b_evo_rm, na.action=na.exclude, correlation=corARMA(p=1,q=1, form=~day|Rep))
 
@@ -254,9 +256,12 @@ plot(ACF(b_rm0_ARMA, resType = "normalized"), alpha=0.05)
 
 #look at best models
 summary(b_rm0_ARMA)
+summary(b_rm0_ARMA2)
 #VarCorr(b_rm0_ARMA)
 confint(b_rm0_ARMA, parm=c("day","Treatment29"))   # lmer
+confint(b_rm0_ARMA2, parm=c("day","Treatment223"))   # lmer
 intervals(b_rm0_ARMA, which="all", level=0.95)
+intervals(b_rm0_ARMA2, which="all", level=0.95)
 anova(b_rm0_ARMA)
 #fixef(b_rm0_ARMA)
 #ranef(b_lme4)

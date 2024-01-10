@@ -75,9 +75,9 @@ b_tpc <- b_tpc[-which(is.na(b_tpc$Actual.Cell.count)),]
 b_tpc$ln_cell_cnt <- log(b_tpc$Actual.Cell.count)
 d_tpc$ln_cell_cnt <- log(d_tpc$Actual.Cell.count)
 
-#'get rid of last 3 points, points after day 10
-b_tpc13 <- b_tpc[b_tpc$day<14,]
-d_tpc13 <- d_tpc[d_tpc$day<14,]
+#'get rid of points after day 10, 13
+b_tpc13 <- b_tpc[b_tpc$day<13.5,]
+d_tpc13 <- d_tpc[d_tpc$day<13.5,]
 b_tpc10 <- b_tpc[b_tpc$day<10.5,]
 d_tpc10 <- d_tpc[d_tpc$day<10.5,]
 
