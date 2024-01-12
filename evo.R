@@ -485,43 +485,53 @@ visreg(d_rm0_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xla
   labs(title="MED4")
 
 ######plot both######
-######here - make same size and with legend. Also suppress some stuff########
 
 med4 <- visreg(d_rm0_ARMAa, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
-  scale_color_manual(values=c("royalblue1","red4")) +
-  scale_fill_manual(values=c("royalblue1","red4")) +
-  labs(title="MED4")
+  scale_color_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
+  scale_fill_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
+  ylim(-0.2,0.9)+
+  xlim(0,180)+
+  labs(title="eMED4")
 
 mit9312 <- visreg(b_rm0_ARMA, "day", by="Treatment", overlay=TRUE, ylab="Growth rate", xlab="Day", gg=TRUE)+
   theme_bw() +
   scale_color_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
   scale_fill_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
-  labs(title="MIT9312")
+  ylim(-0.2,0.9)+
+  xlim(0,180)+
+  labs(title="eMIT9312")
 
-ggarrange(mit9312, med4, ncol=2, nrow=1, legend = "right", common.legend=TRUE)
+fig <- ggarrange(med4 + rremove("ylab"), mit9312 + rremove("ylab"), ncol=2, nrow=1, legend = "right", common.legend=TRUE)
+annotate_figure(fig, left = text_grob("Growth rate", rot=90))
+
+
 #######show down turn points#####
-head(b_evo_nona)
+
 d_evo_nona$col <- ""
-d_evo_nona[d_evo_nona$Treatment==23,]$col <- "blue"
-d_evo_nona[d_evo_nona$Treatment==27,]$col <- "red"
+d_evo_nona[d_evo_nona$Treatment==23,]$col <- "royalblue1"
+d_evo_nona[d_evo_nona$Treatment==27,]$col <- "red4"
 d_evo_rm$col <- ""
-d_evo_rm[d_evo_rm$Treatment==23,]$col <- "blue"
-d_evo_rm[d_evo_rm$Treatment==27,]$col <- "red"
+d_evo_rm[d_evo_rm$Treatment==23,]$col <- "royalblue1"
+d_evo_rm[d_evo_rm$Treatment==27,]$col <- "red4"
 
 b_evo_nona$col <- ""
-b_evo_nona[b_evo_nona$Treatment==23,]$col <- "blue"
-b_evo_nona[b_evo_nona$Treatment==29,]$col <- "red"
+b_evo_nona[b_evo_nona$Treatment==23,]$col <- "royalblue1"
+b_evo_nona[b_evo_nona$Treatment==29,]$col <- "red4"
 b_evo_rm$col <- ""
-b_evo_rm[b_evo_rm$Treatment==23,]$col <- "blue"
-b_evo_rm[b_evo_rm$Treatment==29,]$col <- "red"
+b_evo_rm[b_evo_rm$Treatment==23,]$col <- "royalblue1"
+b_evo_rm[b_evo_rm$Treatment==29,]$col <- "red4"
 
-plot(d_evo_nona$day, d_evo_nona$gr, pch=4, col=d_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="ProD")
+par(mfrow=c(1,3), xpd=TRUE)
+
+plot(d_evo_nona$day, d_evo_nona$gr, pch=4, col=d_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="eMED4")
 points(d_evo_rm$day, d_evo_rm$gr, pch=19, col=d_evo_rm$col)
 
-plot(b_evo_nona$day, b_evo_nona$gr, pch=4, col=b_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="ProB")
+plot(b_evo_nona$day, b_evo_nona$gr, pch=4, col=b_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="eMIT9312")
 points(b_evo_rm$day, b_evo_rm$gr, pch=19, col=b_evo_rm$col)
-lines(b_evo_rm$day, b_evo_rm$gr, pch=19, col=b_evo_rm$col)
+plot.new()
+legend(x=c(0,0.5),y=c(0.42,0.58), legend=c("Control","Warmed"), pch=c(19,19), title="Treatment", col=c("royalblue1","red4"))
+
 
 #########mark one weird replicate in ProD - #R6 27 ###################
 plot(d_evo_nona$day, d_evo_nona$gr, pch=4, col=d_evo_nona$col, cex=0.8, ylab="Day", xlab="Growth rate", main="ProD")
@@ -875,3 +885,4 @@ summary(fit1)$adj.r.squared
 fit1$coefficients
 summary(fit1.rm)$adj.r.squared
 fit1.rm$coefficients
+

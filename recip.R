@@ -65,8 +65,6 @@ ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
        y = "log(Actual Cell Count)",
        title="ProB")
 
-
-
 ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
   geom_line(aes(group=rep))+
