@@ -40,16 +40,22 @@ d_recip$day <- as.numeric(round(difftime(d_recip$Date, d_recip$Date[1], units="d
 #add to column Evo.Temp when control (currently blank)
 for (i in 1:length(d_recip$File.ID)){
   if(is.na(d_recip$Evo.Temp[i])){
-    d_recip$Evo.Temp[i] <- as.numeric(gsub("c","",d_recip$Assay.Temp[i]))
+    d_recip$Evo.Temp[i] <- gsub("c","",d_recip$Assay.Temp[i])
   }
 }
 
 #add to column Evo.Temp when control (currently blank)
 for (i in 1:length(b_recip$File.ID)){
   if(is.na(b_recip$Evo.Temp[i])){
-    b_recip$Evo.Temp[i] <- as.numeric(gsub("c","",b_recip$Assay.Temp[i]))
+    b_recip$Evo.Temp[i] <- gsub("c","",b_recip$Assay.Temp[i])
   }
 }
+
+#make both Evo.Temp and Assay.Temp factors
+b_recip$Evo.Temp <- as.factor(b_recip$Evo.Temp)
+b_recip$Assay.Temp <- as.factor(b_recip$Assay.Temp)
+d_recip$Evo.Temp <- as.factor(d_recip$Evo.Temp)
+d_recip$Assay.Temp <- as.factor(d_recip$Assay.Temp)
 
 #make new replicate ids
 b_recip$rep <- paste(b_recip$Rep.ID,b_recip$Evo.Temp)
@@ -63,7 +69,7 @@ ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   facet_wrap(~Assay.Temp)+
   labs(x = "Day",
        y = "log(Actual Cell Count)",
-       title="ProB")
+       title="eMIT9312")
 
 ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
@@ -72,7 +78,7 @@ ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   facet_wrap(~Assay.Temp)+
   labs(x = "Day",
        y = "log(Actual Cell Count)",
-       title="ProD")
+       title="eMED4")
 
 #####fit lines####
 #basic regression line - by replicate
