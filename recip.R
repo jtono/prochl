@@ -97,12 +97,13 @@ for (i in unique(b_recip$rep)){
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
     Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, sub2$Evo.Temp[1])
+    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
 b_gr <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
 names(b_gr) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
+b_gr$Evo.Temp <- as.factor(b_gr$Evo.Temp)
 
 p <- ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
@@ -126,12 +127,13 @@ for (i in unique(d_recip$rep)){
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
     Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, sub2$Evo.Temp[1])
+    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
 d_gr <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
 names(d_gr) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
+d_gr$Evo.Temp <- as.factor(d_gr$Evo.Temp)
 
 p <- ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
@@ -157,12 +159,13 @@ for (i in unique(b_recip10$rep)){
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
     Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, sub2$Evo.Temp[1])
+    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
 b_gr10 <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
 names(b_gr10) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
+b_gr10$Evo.Temp <- as.factor(b_gr10$Evo.Temp)
 
 p <- ggplot(data=b_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
@@ -188,12 +191,13 @@ for (i in unique(d_recip10$rep)){
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
     Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, sub2$Evo.Temp[1])
+    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
 d_gr10 <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
 names(d_gr10) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
+d_gr10$Evo.Temp <- as.factor(d_gr10$Evo.Temp)
 
 p <- ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
   geom_point()+
@@ -228,22 +232,22 @@ d_treat_tk <- TukeyHSD(aov.model4, conf.level=.95)
 plot(d_treat_tk)
 
 
-aov.model110 <- aov(sl~Assay.Temp*Evo.Temp, data=b_gr10)
-summary(aov.model110)
+aov.modelb10 <- aov(sl~Assay.Temp*Evo.Temp, data=b_gr10)
+summary(aov.modelb10)
 aov.model210 <- aov(sl~Treatment, data=b_gr10)
 summary(aov.model210)
-b_treat_tk10 <- TukeyHSD(aov.model210, conf.level=.95)
+b_treat_tk10 <- TukeyHSD(aov.modelb10, conf.level=.95)
 plot(b_treat_tk10)
-write.csv(b_treat_tk10$Treatment, "b_treat_tk10.csv")
+write.csv(b_treat_tk10$`Assay.Temp:Evo.Temp`, "b_treat_tk10.csv")
 
 
-aov.model310 <- aov(sl~Assay.Temp*Evo.Temp, data=d_gr10)
-summary(aov.model310)
+aov.modeld10 <- aov(sl~Assay.Temp*Evo.Temp, data=d_gr10)
+summary(aov.modeld10)
 aov.model410 <- aov(sl~Treatment, data=d_gr10)
 summary(aov.model410)
-d_treat_tk10 <- TukeyHSD(aov.model410, conf.level=.95)
+d_treat_tk10 <- TukeyHSD(aov.modeld10, conf.level=.95)
 plot(d_treat_tk10)
-write.csv(d_treat_tk10$Treatment, "d_treat_tk10.csv")
+write.csv(d_treat_tk10$`Assay.Temp:Evo.Temp`, "d_treat_tk10.csv")
 
 
 
