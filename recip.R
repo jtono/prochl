@@ -84,10 +84,10 @@ ggplot(data=d_recip, aes(x=day, y=log(Actual.Cell.count), col=Evo.Temp))+
 #basic regression line - by replicate
 #for b
 rep <- c()
-Assay.Temp <- c()
+A.Temp <- c()
 int <- c()
 sl <- c()
-Evo.Temp <- c()
+E.Temp <- c()
 for (i in unique(b_recip$rep)){
   sub <- subset(b_recip, rep==i)
   for (j in unique(sub$Assay.Temp)){
@@ -96,12 +96,12 @@ for (i in unique(b_recip$rep)){
     int <- c(int, mod$coefficients[1])
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
-    Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
+    A.Temp <- c(A.Temp, j)
+    E.Temp <- c(E.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
-b_gr <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
+b_gr <- data.frame(A.Temp, rep, int, sl, E.Temp)
 names(b_gr) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
 b_gr$Evo.Temp <- as.factor(b_gr$Evo.Temp)
 
@@ -114,10 +114,10 @@ p + geom_abline(data=b_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 
 #for d
 rep <- c()
-Assay.Temp <- c()
+A.Temp <- c()
 int <- c()
 sl <- c()
-Evo.Temp <- c()
+E.Temp <- c()
 for (i in unique(d_recip$rep)){
   sub <- subset(d_recip, rep==i)
   for (j in unique(sub$Assay.Temp)){
@@ -126,12 +126,12 @@ for (i in unique(d_recip$rep)){
     int <- c(int, mod$coefficients[1])
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
-    Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
+    A.Temp <- c(A.Temp, j)
+    E.Temp <- c(E.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
-d_gr <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
+d_gr <- data.frame(A.Temp, rep, int, sl, E.Temp)
 names(d_gr) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
 d_gr$Evo.Temp <- as.factor(d_gr$Evo.Temp)
 
@@ -146,10 +146,10 @@ p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 b_recip10 <- subset(b_recip, day<10.5)
 #for b
 rep <- c()
-Assay.Temp <- c()
+A.Temp <- c()
 int <- c()
 sl <- c()
-Evo.Temp <- c()
+E.Temp <- c()
 for (i in unique(b_recip10$rep)){
   sub <- subset(b_recip10, rep==i)
   for (j in unique(sub$Assay.Temp)){
@@ -158,12 +158,12 @@ for (i in unique(b_recip10$rep)){
     int <- c(int, mod$coefficients[1])
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
-    Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
+    A.Temp <- c(A.Temp, j)
+    E.Temp <- c(E.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
-b_gr10 <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
+b_gr10 <- data.frame(A.Temp, rep, int, sl, E.Temp)
 names(b_gr10) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
 b_gr10$Evo.Temp <- as.factor(b_gr10$Evo.Temp)
 
@@ -178,10 +178,10 @@ p + geom_abline(data=b_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 d_recip10 <- subset(d_recip, day<10.5)
 #for d
 rep <- c()
-Assay.Temp <- c()
+A.Temp <- c()
 int <- c()
 sl <- c()
-Evo.Temp <- c()
+E.Temp <- c()
 for (i in unique(d_recip10$rep)){
   sub <- subset(d_recip10, rep==i)
   for (j in unique(sub$Assay.Temp)){
@@ -190,12 +190,12 @@ for (i in unique(d_recip10$rep)){
     int <- c(int, mod$coefficients[1])
     sl <- c(sl, mod$coefficients[2])
     rep <- c(rep, i)
-    Assay.Temp <- c(Assay.Temp, j)
-    Evo.Temp <- c(Evo.Temp, as.character(sub2$Evo.Temp[1]))
+    A.Temp <- c(A.Temp, j)
+    E.Temp <- c(E.Temp, as.character(sub2$Evo.Temp[1]))
   }
 }
 
-d_gr10 <- data.frame(Assay.Temp, rep, int, sl, Evo.Temp)
+d_gr10 <- data.frame(A.Temp, rep, int, sl, E.Temp)
 names(d_gr10) <- c("Assay.Temp","Rep","int","sl", "Evo.Temp")
 d_gr10$Evo.Temp <- as.factor(d_gr10$Evo.Temp)
 
@@ -211,10 +211,10 @@ p + geom_abline(data=d_gr, aes(slope=sl, intercept=int, col=Evo.Temp))
 
 
 ###########stats###############
-b_gr$Treatment <- paste(b_gr$Evo.Temp, "@",b_gr$Assay.Temp)
-b_gr10$Treatment <- paste(b_gr10$Evo.Temp, "@",b_gr10$Assay.Temp)
-d_gr$Treatment <- paste(d_gr$Evo.Temp, "@",d_gr$Assay.Temp)
-d_gr10$Treatment <- paste(d_gr10$Evo.Temp, "@",d_gr10$Assay.Temp)
+b_gr$Treatment <- paste(b_gr$Assay.Temp, ":",b_gr$Evo.Temp, sep="")
+b_gr10$Treatment <- paste(b_gr10$Assay.Temp, ":",b_gr10$Evo.Temp, sep="")
+d_gr$Treatment <- paste(d_gr$Assay.Temp, ":",d_gr$Evo.Temp, sep="")
+d_gr10$Treatment <- paste(d_gr10$Assay.Temp, ":",d_gr10$Evo.Temp, sep="")
 
 aov.model1 <- aov(sl~Assay.Temp*Evo.Temp, data=b_gr)
 summary(aov.model1)
@@ -238,7 +238,7 @@ aov.model210 <- aov(sl~Treatment, data=b_gr10)
 summary(aov.model210)
 b_treat_tk10 <- TukeyHSD(aov.modelb10, conf.level=.95)
 plot(b_treat_tk10)
-write.csv(b_treat_tk10$`Assay.Temp:Evo.Temp`, "b_treat_tk10.csv")
+#write.csv(b_treat_tk10$`Assay.Temp:Evo.Temp`, "b_treat_tk10.csv")
 
 
 aov.modeld10 <- aov(sl~Assay.Temp*Evo.Temp, data=d_gr10)
@@ -247,7 +247,7 @@ aov.model410 <- aov(sl~Treatment, data=d_gr10)
 summary(aov.model410)
 d_treat_tk10 <- TukeyHSD(aov.modeld10, conf.level=.95)
 plot(d_treat_tk10)
-write.csv(d_treat_tk10$`Assay.Temp:Evo.Temp`, "d_treat_tk10.csv")
+#write.csv(d_treat_tk10$`Assay.Temp:Evo.Temp`, "d_treat_tk10.csv")
 
 
 
@@ -256,31 +256,38 @@ write.csv(d_treat_tk10$`Assay.Temp:Evo.Temp`, "d_treat_tk10.csv")
 ######plot grs - boxplots with tukey letters#####
 
 #b
-
-p <- ggplot(b_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+p <- ggplot(b_gr, aes(x=Assay.Temp, y=sl, col=Evo.Temp)) +
   geom_boxplot()+
-  labs(x = 'Treatment',
+  labs(x = 'Assay Temperature',
        y = 'Growth rate',
-       title = 'ProB')
+       title = 'eMIT9312')
 p
 
-letters.df <- data.frame(multcompLetters(TukeyHSD(aov.model210, conf.level=.95)$Treatment[,4])$Letters)
+letters.df <- data.frame(multcompLetters(TukeyHSD(aov.modelb10, conf.level=.95)$`Assay.Temp:Evo.Temp`[,4])$Letters)
 colnames(letters.df)[1] <- "Letter" #Reassign column name
 letters.df$Treatment <- rownames(letters.df) #Create column based on rownames
 placement <- b_gr10 %>% #We want to create a dataframe to assign the letter position.
-  group_by(Treatment) %>%
+  group_by(Assay.Temp,Evo.Temp) %>%
   summarise(quantile(sl)[4])
-colnames(placement)[2] <- "Placement.Value"
+placement$Treatment <- paste(placement$Assay.Temp, ":", placement$Evo.Temp, sep="")
+colnames(placement)[3] <- "Placement.Value"
 letters.df <- left_join(letters.df, placement) #Merge dataframes
 
+b_gr10 <- left_join(b_gr10, letters.df, by="Treatment")
 
-p <- ggplot(b_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()+
-  labs(x = 'Treatment',
+
+p <- ggplot(b_gr10, aes(x=Assay.Temp.x, y=sl, group=interaction(Assay.Temp.x,Evo.Temp.x))) +
+  geom_boxplot(aes(col=Evo.Temp.x))+
+  labs(x = 'Assay Temperature',
        y = 'Growth rate',
-       title = 'ProB')+
-  geom_text(data = letters.df, aes(x = Treatment, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = -1.25, vjust = -0.8, fontface = "bold")
+       title = 'eMIT9312')+
+  theme_bw() +
+  scale_color_manual(values=c("royalblue1","red4")) +
+  geom_text(data = b_gr10, aes(x = Assay.Temp.x, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = 0.5, vjust = -1.4, fontface = "bold", position=position_dodge(0.75))+
+ scale_x_discrete(breaks=c("23c","29c"),labels=c("23","29"))
 p
+
+#######here - do same for d and then put two together###########
 
 
 
