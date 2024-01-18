@@ -276,48 +276,55 @@ letters.df <- left_join(letters.df, placement) #Merge dataframes
 b_gr10 <- left_join(b_gr10, letters.df, by="Treatment")
 
 
-p <- ggplot(b_gr10, aes(x=Assay.Temp.x, y=sl, group=interaction(Assay.Temp.x,Evo.Temp.x))) +
+b_box <- ggplot(b_gr10, aes(x=Assay.Temp.x, y=sl, group=interaction(Assay.Temp.x,Evo.Temp.x))) +
   geom_boxplot(aes(col=Evo.Temp.x))+
   labs(x = 'Assay Temperature',
        y = 'Growth rate',
        title = 'eMIT9312')+
   theme_bw() +
-  scale_color_manual(values=c("royalblue1","red4")) +
-  geom_text(data = b_gr10, aes(x = Assay.Temp.x, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = 0.5, vjust = -1.4, fontface = "bold", position=position_dodge(0.75))+
- scale_x_discrete(breaks=c("23c","29c"),labels=c("23","29"))
-p
-
-#######here - do same for d and then put two together###########
-
-
-
+  scale_color_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
+  geom_text(data = b_gr10, aes(x = Assay.Temp.x, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = -0.5, vjust = -0.5, fontface = "bold", position=position_dodge(0.75))+
+  scale_x_discrete(breaks=c("23c","29c"),labels=c("23","29"))+
+  ylim(0,0.7)
+b_box
 
 
 #d
-
-p <- ggplot(d_gr, aes(x=Treatment, y=sl, col=Evo.Temp)) +
+p <- ggplot(d_gr, aes(x=Assay.Temp, y=sl, col=Evo.Temp)) +
   geom_boxplot()+
-  labs(x = 'Treatment',
+  labs(x = 'Assay Temperature',
        y = 'Growth rate',
-       title = 'ProD')
+       title = 'eMED4')
 p
 
-letters.df <- data.frame(multcompLetters(TukeyHSD(aov.model410, conf.level=.95)$Treatment[,4])$Letters)
+letters.df <- data.frame(multcompLetters(TukeyHSD(aov.modeld10, conf.level=.95)$`Assay.Temp:Evo.Temp`[,4])$Letters)
 colnames(letters.df)[1] <- "Letter" #Reassign column name
 letters.df$Treatment <- rownames(letters.df) #Create column based on rownames
 placement <- d_gr10 %>% #We want to create a dataframe to assign the letter position.
-  group_by(Treatment) %>%
+  group_by(Assay.Temp,Evo.Temp) %>%
   summarise(quantile(sl)[4])
-colnames(placement)[2] <- "Placement.Value"
+placement$Treatment <- paste(placement$Assay.Temp, ":", placement$Evo.Temp, sep="")
+colnames(placement)[3] <- "Placement.Value"
 letters.df <- left_join(letters.df, placement) #Merge dataframes
 
-p <- ggplot(d_gr10, aes(x=Treatment, y=sl, col=Evo.Temp)) +
-  geom_boxplot()+
-  labs(x = 'Treatment',
+d_gr10 <- left_join(d_gr10, letters.df, by="Treatment")
+
+
+d_box <- ggplot(d_gr10, aes(x=Assay.Temp.x, y=sl, group=interaction(Assay.Temp.x,Evo.Temp.x))) +
+  geom_boxplot(aes(col=Evo.Temp.x))+
+  labs(x = 'Assay Temperature',
        y = 'Growth rate',
-       title = 'ProD')+
-  geom_text(data = letters.df, aes(x = Treatment, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = -1.25, vjust = -0.8, fontface = "bold")
-p
+       title = 'eMED4')+
+  theme_bw() +
+  scale_color_manual(values=c("royalblue1","red4"), name = "Treatment", labels = c("Control", "Warmed")) +
+  geom_text(data = d_gr10, aes(x = Assay.Temp.x, y = Placement.Value, label = Letter), size = 4, color = "black" , hjust = -0.5, vjust = -0.5, fontface = "bold", position=position_dodge(0.75))+
+  scale_x_discrete(breaks=c("23c","27c"),labels=c("23","27"))+
+  ylim(0,0.7)
+d_box
+
+#combine two figs
+comb_box <- ggarrange(d_box + rremove("ylab"), b_box + rremove("ylab"), ncol=2, nrow=1, legend = "right", common.legend=TRUE)
+annotate_figure(comb_box, left = text_grob("Growth rate", rot=90))
 
 ########find one ProD replicate with low growth - rerun analysis with omitted#########
 d_gr10[which(d_gr10$sl<0.2),]

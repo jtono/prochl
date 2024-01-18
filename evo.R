@@ -408,7 +408,7 @@ aic_comp_d[c(8,10,11,15,22),]
 anov_comp_d <- anova(d_rmI,d_rm0,d_rm_AR1,d_rmI_AR1,d_rmI_AR1b,d_rmI_AR1c,d_rm0_AR1,d_rm0_AR1a,d_rm0_AR1c,d_rm_ARMA,d_rmI_ARMA,d_rmI_ARMAb,d_rmI_ARMAc,d_rm0_ARMA,d_rm0_ARMAa,d_rm0_ARMAc,d_rm_CAR1,d_rmI_CAR1,d_rmI_CAR1b,d_rmI_CAR1c,d_rm0_CAR1,d_rm0_CAR1a,d_rm0_CAR1c,d_rmI_CompSymm,d_rmI_CompSymmb,d_rmI_CompSymmc,d_rm0_CompSymm,d_rm0_CompSymma,d_rm0_CompSymmb,d_rm0_CompSymmc,test=TRUE)
 
 #save anova table output
-save_as_docx(flextable(anov_comp_d),path="tables/tableSup1_d.docx")
+#save_as_docx(flextable(anov_comp_d),path="tables/tableSup1_d.docx")
 
 which(anov_comp_d$logLik==max(anov_comp_d$logLik))
 anov_comp_d[15,]
